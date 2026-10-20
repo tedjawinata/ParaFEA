@@ -3,6 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="author" content="G.K. Tedjawinata">
+<meta name="description" content="ParaFEA - Parametric Structural FEA. Developed by G.K. Tedjawinata">
 <title>ParaFEA - Parametric Structural FEA</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script type="importmap">
@@ -46,6 +48,7 @@
         <div>
           <div class="text-sm font-semibold tracking-wide">ParaFEA <span class="text-orange-400">Structural</span></div>
           <div class="text-[10px] text-slate-400">Truss · Frame · Wall · Slab — linear static FEA · Rhino / Grasshopper workflow</div>
+          <div class="text-[10px] text-orange-300/80 mt-0.5">Developed by G.K. Tedjawinata</div>
         </div>
       </div>
     </div>
@@ -887,7 +890,7 @@ UI.forEach(card=>{
   card.items.forEach(it=>{ const e=field(it); body.appendChild(e); els.push({e,it}); });
   $('panels').appendChild(sec); cardEls.push({sec,els});
 });
-$('panels').appendChild(mk(`<details class="text-[10px] text-slate-500 mb-4"><summary class="cursor-pointer text-slate-400">Assumptions &amp; element types</summary><ul class="list-disc pl-4 mt-1 space-y-0.5"><li>Truss: pin-jointed bar elements, 3 DOF/node.</li><li>Beam/frame: 3D Euler-Bernoulli beam, 6 DOF/node, rigid joints, rectangular sections. σ<sub>max</sub> = N/A + M<sub>y</sub>/S<sub>y</sub> + M<sub>z</sub>/S<sub>z</sub> (conservative, uncracked elastic).</li><li>Wall: plane-stress Q4 elements (selective reduced integration), XZ plane. Stresses are element-centre values, smoothed to nodes for display.</li><li>Slab: Mindlin-Reissner Q4 plate (w, θx, θy), shear-locking controlled by reduced integration. Stresses at the top fibre, σ = 6M/t².</li><li>Linear elastic, small displacements. Units: m, kN, GPa, MPa.</li><li>Utilization = σ/fy (not a code check; no load factors, no concrete cracking or reinforcement design).</li></ul></details>`));
+$('panels').appendChild(mk(`<div class="text-[10px] text-slate-500 text-center mb-2">ParaFEA · Developed by G.K. Tedjawinata</div><details class="text-[10px] text-slate-500 mb-4"><summary class="cursor-pointer text-slate-400">Assumptions &amp; element types</summary><ul class="list-disc pl-4 mt-1 space-y-0.5"><li>Truss: pin-jointed bar elements, 3 DOF/node.</li><li>Beam/frame: 3D Euler-Bernoulli beam, 6 DOF/node, rigid joints, rectangular sections. σ<sub>max</sub> = N/A + M<sub>y</sub>/S<sub>y</sub> + M<sub>z</sub>/S<sub>z</sub> (conservative, uncracked elastic).</li><li>Wall: plane-stress Q4 elements (selective reduced integration), XZ plane. Stresses are element-centre values, smoothed to nodes for display.</li><li>Slab: Mindlin-Reissner Q4 plate (w, θx, θy), shear-locking controlled by reduced integration. Stresses at the top fibre, σ = 6M/t².</li><li>Linear elastic, small displacements. Units: m, kN, GPa, MPa.</li><li>Utilization = σ/fy (not a code check; no load factors, no concrete cracking or reinforcement design).</li></ul></details>`));
 
 function applyVisibility(){
   visRegistry.forEach(({el,it})=>{
