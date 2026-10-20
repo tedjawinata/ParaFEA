@@ -1,0 +1,1209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ParaFEA - Parametric Structural FEA</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script type="importmap">
+{ "imports": {
+  "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+} }
+</script>
+<style>
+  html,body{height:100%;margin:0;background:#0b0e14;font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif;color:#e2e8f0}
+  .glass{background:rgba(18,22,32,.74);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.08)}
+  #viewport{background:radial-gradient(ellipse at 50% 35%,#1c2333 0%,#0d1119 60%,#080a0f 100%)}
+  input[type=range]{-webkit-appearance:none;appearance:none;height:4px;background:#2a3142;border-radius:4px;width:100%;outline:none}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:#ff9f2e;border:2px solid #0b0e14;box-shadow:0 0 0 1px #ff9f2e;cursor:pointer}
+  input[type=range]::-moz-range-thumb{width:12px;height:12px;border-radius:50%;background:#ff9f2e;border:2px solid #0b0e14;cursor:pointer}
+  input[type=range]:disabled{opacity:.35}
+  .num{width:64px;background:#0d1119;border:1px solid #2a3142;border-radius:4px;color:#fbbf6a;font-size:11px;padding:2px 4px;text-align:right;font-variant-numeric:tabular-nums}
+  .num:focus,.sel:focus{outline:1px solid #ff9f2e}
+  .sel{width:100%;background:#0d1119;border:1px solid #2a3142;border-radius:4px;color:#e2e8f0;font-size:11px;padding:4px 6px}
+  .port{width:8px;height:8px;border-radius:50%;background:#0d1119;border:2px solid #ff9f2e;display:inline-block}
+  .port.out{border-color:#34d399}
+  .tip{position:relative;cursor:help;display:inline-flex;align-items:center;justify-content:center;width:13px;height:13px;border-radius:50%;border:1px solid #475569;color:#94a3b8;font-size:9px;flex:none}
+  .tip:hover::after{content:attr(data-tip);position:absolute;left:0;top:17px;z-index:60;width:210px;padding:6px 8px;background:#05070b;border:1px solid #2a3142;border-radius:6px;font-size:11px;color:#cbd5e1;line-height:1.35;white-space:normal;font-weight:400;text-transform:none;letter-spacing:0}
+  .pill{font-size:11px;padding:4px 10px;border-radius:999px;border:1px solid rgba(255,255,255,.12);color:#94a3b8;cursor:pointer;user-select:none;transition:.15s}
+  .pill:hover{color:#e2e8f0}
+  .pill.on{background:rgba(255,159,46,.16);border-color:#ff9f2e;color:#ffc27a}
+  .btn{font-size:11px;padding:6px 8px;border-radius:6px;background:#1b2130;border:1px solid #2a3142;color:#cbd5e1;cursor:pointer;flex:1}
+  .btn:hover{border-color:#ff9f2e;color:#fff}
+  .lbl{position:absolute;font-size:10px;color:#67e8f9;transform:translate(-50%,-130%);pointer-events:none;text-shadow:0 0 3px #000;white-space:nowrap}
+  ::-webkit-scrollbar{width:8px}::-webkit-scrollbar-thumb{background:#2a3142;border-radius:4px}
+</style>
+</head>
+<body class="overflow-hidden">
+<div class="flex flex-col md:flex-row h-full">
+
+  <!-- SIDEBAR -->
+  <aside class="glass w-full md:w-[350px] md:min-w-[350px] h-[46%] md:h-full flex flex-col z-20 order-2 md:order-1">
+    <div class="px-4 py-3 border-b border-white/10">
+      <div class="flex items-center gap-2">
+        <div class="w-7 h-7 rounded-md bg-gradient-to-br from-orange-400 to-rose-500 flex items-center justify-center text-[13px] font-bold text-black">FE</div>
+        <div>
+          <div class="text-sm font-semibold tracking-wide">ParaFEA <span class="text-orange-400">Structural</span></div>
+          <div class="text-[10px] text-slate-400">Truss · Frame · Wall · Slab — linear static FEA · Rhino / Grasshopper workflow</div>
+        </div>
+      </div>
+    </div>
+    <div id="panels" class="flex-1 overflow-y-auto p-3"></div>
+    <div class="p-3 border-t border-white/10 flex gap-2">
+      <button class="btn" id="bReset" title="Restore default parameters for the current structure type">Reset</button>
+      <button class="btn" id="bFit" title="Fit camera to structure">Fit view</button>
+      <button class="btn" id="bCsv" title="Download nodes, elements and results as CSV">CSV</button>
+      <button class="btn" id="bPy" title="Download a RhinoPython script (lines or mesh) with results">RhinoPy</button>
+    </div>
+  </aside>
+
+  <!-- VIEWPORT -->
+  <main class="relative flex-1 order-1 md:order-2 min-h-0" id="viewport">
+    <div id="canvasHost" class="absolute inset-0"></div>
+    <div id="labels" class="absolute inset-0 pointer-events-none overflow-hidden"></div>
+
+    <div class="absolute top-3 left-3 right-3 md:right-[330px] flex flex-wrap gap-1.5 z-10" id="toggles">
+      <span class="pill on" data-k="orig">Original wireframe</span>
+      <span class="pill on" data-k="def">Deformed shape</span>
+      <span class="pill on" data-k="stress">Stress colors</span>
+      <span class="pill on" data-k="mesh" id="pillMesh">Mesh edges</span>
+      <span class="pill" data-k="labels">Node labels</span>
+      <span class="pill on" data-k="loads">Load vectors</span>
+      <span class="pill on" data-k="supports">Supports</span>
+      <span class="pill on" data-k="grid">Grid</span>
+    </div>
+
+    <div class="glass absolute top-3 right-3 w-[310px] max-h-[calc(100%-24px)] overflow-y-auto rounded-xl z-10 hidden md:block" id="resultsCard">
+      <div class="px-3 py-2 border-b border-white/10 flex items-center justify-between">
+        <span class="text-[11px] font-semibold uppercase tracking-wider text-slate-200">Results · Verification</span>
+        <span id="rStatus" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300">—</span>
+      </div>
+      <div id="rWarn" class="hidden m-3 mb-0 text-[11px] text-rose-200 bg-rose-500/15 border border-rose-500/40 rounded-md p-2"></div>
+      <div class="p-3 grid grid-cols-2 gap-2" id="cards"></div>
+      <div class="px-3 pb-3">
+        <div class="flex justify-between text-[10px] text-slate-400 mb-1"><span>Structural efficiency (utilization)</span><span id="rUtil" class="text-slate-200 font-semibold tabular-nums">0%</span></div>
+        <div class="h-2 rounded-full bg-[#2a3142] overflow-hidden"><div id="rUtilBar" class="h-full rounded-full" style="width:0%"></div></div>
+        <div id="rUtilSub" class="text-[10px] text-slate-500 mt-1">—</div>
+      </div>
+      <div class="px-3 pb-3 text-[10px] text-slate-400 grid grid-cols-1 gap-y-0.5 border-t border-white/10 pt-2">
+        <div>Applied ΣF: <span id="rFz" class="text-slate-200">—</span></div>
+        <div>Reactions ΣR: <span id="rRz" class="text-slate-200">—</span></div>
+        <div class="flex gap-4"><span>Equilibrium err: <span id="rEq" class="text-slate-200">—</span></span><span>Solve: <span id="rT" class="text-slate-200">—</span></span></div>
+        <div id="rMeta">—</div>
+      </div>
+    </div>
+
+    <div class="glass absolute bottom-3 left-3 rounded-lg px-3 py-2 z-10 w-[270px]">
+      <div id="lgTitle" class="text-[10px] text-slate-300 mb-1">—</div>
+      <div class="h-2.5 rounded" style="background:linear-gradient(90deg,hsl(240,90%,50%),hsl(180,90%,50%),hsl(120,90%,50%),hsl(60,90%,50%),hsl(0,90%,50%))"></div>
+      <div class="flex justify-between text-[10px] text-slate-400 mt-1 tabular-nums"><span id="lgMin">0</span><span id="lgMid">0</span><span id="lgMax">0</span></div>
+      <div id="lgNote" class="text-[10px] text-slate-500 mt-0.5">—</div>
+    </div>
+    <div class="absolute bottom-3 right-3 text-[10px] text-slate-500 hidden md:block z-10">Left-drag rotate · Right-drag pan · Wheel zoom · Hover for element details</div>
+    <div id="hover" class="glass absolute hidden pointer-events-none text-[11px] rounded-md px-2 py-1.5 z-20 leading-snug"></div>
+  </main>
+</div>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+/*==ENGINE-START==*/
+/* =========================================================
+   ENGINE: parameters, model generation, FEA solver, post-processing
+   Units: m, kN, GPa (input), MPa (output), kg
+   Global axes: X along span / width, Y depth, Z up
+   ========================================================= */
+const MATS = {
+  steel:    { E: 210, fy: 355, rho: 7850, nu: 0.30 },
+  aluminum: { E: 69,  fy: 250, rho: 2700, nu: 0.33 },
+  timber:   { E: 11,  fy: 24,  rho: 600,  nu: 0.30 },
+  concrete: { E: 30,  fy: 30,  rho: 2400, nu: 0.20 }
+};
+const DEFAULTS = {
+  struct:'truss',
+  // truss
+  topo:'pratt', is3D:true, L:24, H:3, n:12, W:2.5, A:30, buckling:true, supL:'pin', supR:'roller',
+  loadMode:'both', loadPos:'top',
+  // frame / beam
+  frameType:'frame', spans:2, Lspan:6, baysX:3, bayW:5, stories:4, storyH:3.2, frame3D:false, baysY:2, bayD:5,
+  div:2, bB:30, bH:50, cB:40, cH:40, bSupL:'pin', bSupR:'roller', baseSup:'fixed',
+  // wall
+  wallL:8, wallH:4, wallT:25, mx:24, mz:12, hasOpening:true, openW:2, openH:1.5, openX:3, openZ:1.5,
+  wallSup:'twopoints', supLen:1,
+  // slab
+  slabLx:6, slabLy:6, slabT:20, msx:16, msy:16, eL:'ss', eR:'ss', eF:'ss', eB:'ss', qload:10,
+  // common
+  mat:'steel', E:210, fy:355, rho:7850, nu:0.30,
+  Pload:50, wload:10, Hload:0, selfWeight:true,
+  colorMode:'axial', autoScale:true, defScale:50
+};
+const PRESETS = {
+  truss:{ mat:'steel',    E:210, fy:355, rho:7850, nu:0.30, Pload:50, wload:10,  Hload:0,  colorMode:'axial' },
+  frame:{ mat:'concrete', E:30,  fy:30,  rho:2400, nu:0.20, Pload:0,  wload:25,  Hload:30, colorMode:'vm' },
+  wall: { mat:'concrete', E:30,  fy:30,  rho:2400, nu:0.20, Pload:0,  wload:120, Hload:0,  colorMode:'vm' },
+  slab: { mat:'concrete', E:30,  fy:30,  rho:2400, nu:0.20, Pload:0,  wload:0,   Hload:0,  colorMode:'vm' }
+};
+const MAXDOF = 5000, GACC = 9.81;
+const fx = (v,d=2)=>Number(v).toFixed(d);
+
+/* ---------- reverse Cuthill-McKee ordering (small bandwidth) ---------- */
+function rcmOrder(nn, elems){
+  const adj=Array.from({length:nn},()=>[]), seen=Array.from({length:nn},()=>new Set());
+  elems.forEach(nl=>{ for(const a of nl) for(const b of nl) if(a!==b && !seen[a].has(b)){ seen[a].add(b); adj[a].push(b);} });
+  const deg=adj.map(a=>a.length), done=new Uint8Array(nn), order=[], stamp=new Int32Array(nn); let st=0;
+  const bfs=s=>{
+    st++; const q=[s], d=[0]; stamp[s]=st; let head=0, maxd=0;
+    while(head<q.length){ const v=q[head], dv=d[head]; head++; if(dv>maxd) maxd=dv;
+      for(const w of adj[v]) if(stamp[w]!==st){ stamp[w]=st; q.push(w); d.push(dv+1); } }
+    let best=s, bd=1e9; for(let i=0;i<q.length;i++) if(d[i]===maxd && deg[q[i]]<bd){ bd=deg[q[i]]; best=q[i]; }
+    return best;
+  };
+  for(let s0=0;s0<nn;s0++){
+    if(done[s0]) continue;
+    let start=bfs(s0); start=bfs(start);
+    const q=[start]; done[start]=1; let head=0;
+    while(head<q.length){ const v=q[head++]; order.push(v);
+      const nb=adj[v].filter(w=>!done[w]).sort((a,b)=>deg[a]-deg[b]);
+      for(const w of nb){ done[w]=1; q.push(w); } }
+  }
+  return order.reverse();
+}
+
+/* ---------- banded Cholesky (lower band storage: L[i*W + (i-j)]) ---------- */
+function bandChol(L,n,W,tol){
+  for(let i=0;i<n;i++){
+    const j0=Math.max(0,i-W+1);
+    for(let j=j0;j<=i;j++){
+      let s=L[i*W+(i-j)];
+      const k0=Math.max(j0,j-W+1);
+      for(let k=k0;k<j;k++) s-=L[i*W+(i-k)]*L[j*W+(j-k)];
+      if(i===j){ if(!(s>tol)) return false; L[i*W]=Math.sqrt(s); }
+      else L[i*W+(i-j)]=s/L[j*W];
+    }
+  }
+  return true;
+}
+function bandSolve(L,b,n,W){
+  const y=new Float64Array(n), x=new Float64Array(n);
+  for(let i=0;i<n;i++){ let s=b[i]; for(let k=Math.max(0,i-W+1);k<i;k++) s-=L[i*W+(i-k)]*y[k]; y[i]=s/L[i*W]; }
+  for(let i=n-1;i>=0;i--){ let s=y[i]; const km=Math.min(n-1,i+W-1); for(let k=i+1;k<=km;k++) s-=L[k*W+(k-i)]*x[k]; x[i]=s/L[i*W]; }
+  return x;
+}
+
+/* ---------- generic FEM solve: [K]{u}={F} ---------- */
+function femSolve(M){
+  const t0=(typeof performance!=='undefined'?performance.now():Date.now());
+  const {nn,dpn,fixed,F,els,axis}=M, nd=nn*dpn;
+  const order=rcmOrder(nn,els.map(e=>e.nodes));
+  const idx=new Int32Array(nd).fill(-1); let nf=0;
+  for(const n of order) for(let k=0;k<dpn;k++){ const d=n*dpn+k; if(!fixed[d]) idx[d]=nf++; }
+  const out={u:new Float64Array(nd),nf,nd,unstable:false,tooLarge:false,sumF:[0,0,0],sumR:[0,0,0],ms:0,bw:0};
+  els.forEach(el=>{
+    const dofs=new Int32Array(el.nodes.length*dpn);
+    el.nodes.forEach((n,a)=>{ for(let k=0;k<dpn;k++) dofs[a*dpn+k]=n*dpn+k; });
+    el.dofs=dofs;
+  });
+  let bw=0;
+  for(const el of els){
+    const m=el.dofs.length;
+    for(let r=0;r<m;r++){ const ir=idx[el.dofs[r]]; if(ir<0) continue;
+      for(let s=0;s<m;s++){ const is=idx[el.dofs[s]]; if(is<0) continue; const df=Math.abs(ir-is); if(df>bw) bw=df; } }
+  }
+  out.bw=bw;
+  const W=bw+1;
+  if(nf>MAXDOF || nf*W*W>4e9){ out.tooLarge=true; return out; }
+  const u=out.u;
+  if(nf>0){
+    const band=new Float64Array(nf*W);
+    for(const el of els){
+      const m=el.dofs.length;
+      for(let r=0;r<m;r++){ const ir=idx[el.dofs[r]]; if(ir<0) continue;
+        for(let s=0;s<m;s++){ const is=idx[el.dofs[s]]; if(is<0||is>ir) continue; band[ir*W+(ir-is)]+=el.ke[r*m+s]; } }
+    }
+    let maxd=0; for(let i=0;i<nf;i++) if(band[i*W]>maxd) maxd=band[i*W];
+    const f=new Float64Array(nf);
+    for(let d=0;d<nd;d++) if(idx[d]>=0) f[idx[d]]=F[d];
+    if(!bandChol(band,nf,W,1e-11*maxd)) out.unstable=true;
+    else {
+      const x=bandSolve(band,f,nf,W);
+      for(let d=0;d<nd;d++) if(idx[d]>=0) u[d]=x[idx[d]];
+    }
+  }
+  // reactions
+  const fint=new Float64Array(nd);
+  for(const el of els){
+    const m=el.dofs.length;
+    for(let r=0;r<m;r++){ let s=0; for(let c=0;c<m;c++) s+=el.ke[r*m+c]*u[el.dofs[c]]; fint[el.dofs[r]]+=s; }
+  }
+  for(let i=0;i<nn;i++) for(let k=0;k<dpn;k++){
+    const ax=axis[k]; if(ax<0) continue; const d=i*dpn+k;
+    out.sumF[ax]+=F[d]; if(fixed[d]) out.sumR[ax]+=fint[d]-F[d];
+  }
+  out.ms=(typeof performance!=='undefined'?performance.now():Date.now())-t0;
+  return out;
+}
+
+function disp3(model,u,i,o){
+  const b=i*model.dpn;
+  if(model.kind==='wall'){ o[0]=u[b]; o[1]=0; o[2]=u[b+1]; }
+  else if(model.kind==='slab'){ o[0]=0; o[1]=0; o[2]=u[b]; }
+  else { o[0]=u[b]; o[1]=u[b+1]; o[2]=u[b+2]; }
+}
+
+/* ---------- helpers: 3D beam ---------- */
+function sectionProps(bcm,hcm){
+  const b=bcm/100, h=hcm/100, A=b*h, Iy=b*h*h*h/12, Iz=h*b*b*b/12;
+  const a=Math.max(b,h), c=Math.min(b,h);
+  const J=a*c*c*c*(1/3-0.21*(c/a)*(1-Math.pow(c,4)/(12*Math.pow(a,4))));
+  return {b,h,A,Iy,Iz,J};
+}
+function beamKeLocal(E,G,A,Iy,Iz,J,L){
+  const k=new Float64Array(144); const set=(i,j,v)=>{k[i*12+j]=v;k[j*12+i]=v;};
+  const EA=E*A/L, GJ=G*J/L;
+  set(0,0,EA);set(6,6,EA);set(0,6,-EA);
+  set(3,3,GJ);set(9,9,GJ);set(3,9,-GJ);
+  const a=12*E*Iz/(L*L*L), b=6*E*Iz/(L*L), c=4*E*Iz/L, d=2*E*Iz/L;
+  set(1,1,a);set(7,7,a);set(1,7,-a);
+  set(1,5,b);set(1,11,b);set(7,5,-b);set(7,11,-b);
+  set(5,5,c);set(11,11,c);set(5,11,d);
+  const a2=12*E*Iy/(L*L*L), b2=6*E*Iy/(L*L), c2=4*E*Iy/L, d2=2*E*Iy/L;
+  set(2,2,a2);set(8,8,a2);set(2,8,-a2);
+  set(2,4,-b2);set(2,10,-b2);set(8,4,b2);set(8,10,b2);
+  set(4,4,c2);set(10,10,c2);set(4,10,d2);
+  return k;
+}
+function localAxes(d){
+  let zl;
+  if(Math.abs(d[2])>0.999) zl=[1,0,0];
+  else { zl=[-d[2]*d[0],-d[2]*d[1],1-d[2]*d[2]]; const n=Math.hypot(zl[0],zl[1],zl[2]); zl=zl.map(v=>v/n); }
+  const yl=[zl[1]*d[2]-zl[2]*d[1], zl[2]*d[0]-zl[0]*d[2], zl[0]*d[1]-zl[1]*d[0]];
+  return [d,yl,zl];
+}
+function makeT(R){
+  const T=new Float64Array(144);
+  for(let b=0;b<4;b++) for(let i=0;i<3;i++) for(let j=0;j<3;j++) T[(3*b+i)*12+3*b+j]=R[i][j];
+  return T;
+}
+function tkt(T,k){
+  const tmp=new Float64Array(144), out=new Float64Array(144);
+  for(let i=0;i<12;i++) for(let j=0;j<12;j++){ let s=0; for(let m=0;m<12;m++) s+=k[i*12+m]*T[m*12+j]; tmp[i*12+j]=s; }
+  for(let i=0;i<12;i++) for(let j=0;j<12;j++){ let s=0; for(let m=0;m<12;m++) s+=T[m*12+i]*tmp[m*12+j]; out[i*12+j]=s; }
+  return out;
+}
+
+/* ---------- helpers: Q4 ---------- */
+const SX=[-1,1,1,-1], SY=[-1,-1,1,1];
+function q4Shape(xi,eta,xy){
+  const dxi=[-.25*(1-eta),.25*(1-eta),.25*(1+eta),-.25*(1+eta)];
+  const det=[-.25*(1-xi),-.25*(1+xi),.25*(1+xi),.25*(1-xi)];
+  let j11=0,j12=0,j21=0,j22=0;
+  for(let i=0;i<4;i++){ j11+=dxi[i]*xy[i][0]; j12+=dxi[i]*xy[i][1]; j21+=det[i]*xy[i][0]; j22+=det[i]*xy[i][1]; }
+  const dJ=j11*j22-j12*j21, dNdx=[], dNdy=[], N=[];
+  for(let i=0;i<4;i++){
+    dNdx[i]=( j22*dxi[i]-j12*det[i])/dJ;
+    dNdy[i]=(-j21*dxi[i]+j11*det[i])/dJ;
+    N[i]=.25*(1+SX[i]*xi)*(1+SY[i]*eta);
+  }
+  return {N,dNdx,dNdy,dJ};
+}
+const GP=1/Math.sqrt(3), GPTS=[[-GP,-GP],[GP,-GP],[GP,GP],[-GP,GP]];
+
+/* =========================================================
+   TRUSS
+   ========================================================= */
+function buildTruss(P){
+  const nodes=[], mem=[];
+  const planes=P.is3D?2:1, ys=planes===2?[-P.W/2,P.W/2]:[0];
+  const n=P.n, dx=P.L/n, warren=P.topo==='warren';
+  const addN=(x,y,z)=>{nodes.push([x,y,z]);return nodes.length-1;};
+  const addM=(a,b,type)=>mem.push({a,b,type});
+  const B=[],T=[];
+  for(let j=0;j<planes;j++){
+    B[j]=[];T[j]=[];
+    for(let i=0;i<=n;i++) B[j][i]=addN(i*dx,ys[j],0);
+    if(warren){ for(let i=0;i<n;i++) T[j][i]=addN((i+0.5)*dx,ys[j],P.H); }
+    else { for(let i=0;i<=n;i++) T[j][i]=addN(i*dx,ys[j],P.H); }
+  }
+  for(let j=0;j<planes;j++){
+    for(let i=0;i<n;i++) addM(B[j][i],B[j][i+1],'bottom chord');
+    if(warren){
+      for(let i=0;i<n-1;i++) addM(T[j][i],T[j][i+1],'top chord');
+      for(let i=0;i<n;i++){ addM(B[j][i],T[j][i],'diagonal'); addM(T[j][i],B[j][i+1],'diagonal'); }
+    } else {
+      for(let i=0;i<n;i++) addM(T[j][i],T[j][i+1],'top chord');
+      for(let i=0;i<=n;i++) addM(B[j][i],T[j][i],'vertical');
+      for(let i=0;i<n;i++){
+        const left=i<n/2;
+        if(P.topo==='pratt'){ left?addM(T[j][i],B[j][i+1],'diagonal'):addM(T[j][i+1],B[j][i],'diagonal'); }
+        else { left?addM(B[j][i],T[j][i+1],'diagonal'):addM(B[j][i+1],T[j][i],'diagonal'); }
+      }
+    }
+  }
+  if(planes===2){
+    const nt=T[0].length;
+    for(let i=0;i<=n;i++) addM(B[0][i],B[1][i],'transverse');
+    for(let i=0;i<nt;i++) addM(T[0][i],T[1][i],'transverse');
+    for(let i=0;i<n;i++){ addM(B[0][i],B[1][i+1],'plan bracing'); addM(B[1][i],B[0][i+1],'plan bracing'); }
+    for(let i=0;i<nt-1;i++){ addM(T[0][i],T[1][i+1],'plan bracing'); addM(T[1][i],T[0][i+1],'plan bracing'); }
+    if(warren){ for(let i=0;i<n;i++){ addM(B[0][i],T[1][i],'sway bracing'); addM(B[1][i],T[0][i],'sway bracing'); } }
+    else { for(let i=0;i<=n;i++){ addM(B[0][i],T[1][i],'sway bracing'); addM(B[1][i],T[0][i],'sway bracing'); } }
+  }
+  const N=nodes.length, fixed=new Uint8Array(3*N), supports=[];
+  const fixDof=(nd,ds)=>ds.forEach(d=>fixed[3*nd+d]=1);
+  const applySup=(bn,tn,type)=>{
+    if(type==='pin') fixDof(bn,[0,1,2]);
+    else if(type==='roller') fixDof(bn,[1,2]);
+    else { fixDof(bn,[0,1,2]); fixDof(tn,[0,1,2]); }
+    supports.push({node:bn,type});
+  };
+  for(let j=0;j<planes;j++){
+    applySup(B[j][0],T[j][0],P.supL);
+    applySup(B[j][n],T[j][T[j].length-1],P.supR);
+  }
+  if(planes===1) for(let i=0;i<N;i++) fixed[3*i+1]=1;
+
+  const F=new Float64Array(3*N);
+  const chord=P.loadPos==='top'?T:B;
+  const useP=P.loadMode!=='udl', useW=P.loadMode!=='point';
+  if(useP&&P.Pload>0){
+    let best=1e9,cand=[];
+    chord.forEach(arr=>arr.forEach(id=>{ const d=Math.abs(nodes[id][0]-P.L/2); if(d<best-1e-9){best=d;cand=[id];} else if(Math.abs(d-best)<=1e-9) cand.push(id); }));
+    cand.forEach(id=>F[3*id+2]-=P.Pload/cand.length);
+  }
+  if(useW&&P.wload>0){
+    chord.forEach(arr=>{
+      arr.forEach((id,k)=>{
+        const x=nodes[id][0];
+        const l=k===0?0:(nodes[arr[k-1]][0]+x)/2;
+        const r=k===arr.length-1?P.L:(x+nodes[arr[k+1]][0])/2;
+        F[3*id+2]-=P.wload*(r-l)/planes;
+      });
+    });
+  }
+  const E=P.E*1e6, Am=P.A*1e-4;
+  const rad=Math.max(0.015,P.L*0.0028*Math.pow(P.A/30,0.25));
+  let weight=0;
+  const els=mem.map(m=>{
+    const a=nodes[m.a],b=nodes[m.b];
+    const dx_=b[0]-a[0],dy_=b[1]-a[1],dz_=b[2]-a[2],L=Math.hypot(dx_,dy_,dz_), c=[dx_/L,dy_/L,dz_/L];
+    const mass=P.rho*Am*L; weight+=mass;
+    if(P.selfWeight){ const w=mass*GACC/1000; F[3*m.a+2]-=w/2; F[3*m.b+2]-=w/2; }
+    const k=E*Am/L, ke=new Float64Array(36);
+    for(let r=0;r<6;r++) for(let s=0;s<6;s++){ const sg=((r<3)===(s<3))?1:-1; ke[r*6+s]=sg*k*c[r%3]*c[s%3]; }
+    return {nodes:[m.a,m.b],ke,type:m.type,L,c,rad};
+  });
+  return {kind:'truss',nn:N,dpn:3,axis:[0,1,2],nodes,els,fixed,F,supports,weight};
+}
+function postTruss(model,P,u){
+  const E=P.E*1e6, A=P.A*1e-4;
+  const lv={axial:[],vm:[],moment:[],util:[]}, Nf=[], utype=[];
+  let maxN=0,maxNi=0,maxSig=0,maxUtil=0,maxUi=0;
+  const tw=Math.sqrt(A/59.69), It=2701*Math.pow(tw,4);
+  model.els.forEach((el,e)=>{
+    const m={a:el.nodes[0],b:el.nodes[1]};
+    let du=0; for(let k=0;k<3;k++) du+=el.c[k]*(u[3*m.b+k]-u[3*m.a+k]);
+    const Nn=E*A/el.L*du, sg=Nn/A/1000;
+    let ut=Math.abs(sg)/P.fy, ty='yield';
+    if(P.buckling&&Nn<0){ const Pcr=Math.PI*Math.PI*E*It/(el.L*el.L); const ub=-Nn/Pcr; if(ub>ut){ut=ub;ty='buckling';} }
+    Nf.push(Nn); utype.push(ty);
+    lv.axial.push(sg); lv.vm.push(Math.abs(sg)); lv.moment.push(0); lv.util.push(ut);
+    if(Math.abs(Nn)>Math.abs(maxN)){maxN=Nn;maxNi=e;}
+    if(Math.abs(sg)>maxSig) maxSig=Math.abs(sg);
+    if(ut>maxUtil){maxUtil=ut;maxUi=e;}
+  });
+  return {
+    lineVals:lv, util:maxUtil, Nf,
+    utilSub:`Governing: M${maxUi} (${model.els[maxUi].type}) · ${utype[maxUi]} · fy = ${P.fy} MPa`,
+    lineHover:e=>{ const el=model.els[e], Nn=Nf[e];
+      return `<b>M${e}</b> · ${el.type} (N${el.nodes[0]}–N${el.nodes[1]})<br>L = ${fx(el.L)} m<br>N = <b>${fx(Nn,1)} kN</b> ${Math.abs(Nn)<1e-6?'':Nn>0?'(tension)':'(compression)'}<br>σ = ${fx(lv.axial[e],1)} MPa<br>Util = ${fx(lv.util[e]*100,0)}% (${utype[e]})`; },
+    peak:{maxN,maxNi,maxSig},
+    _cards:(model,dm,weight)=>[
+      {label:'Max displacement',value:fx(dm.maxDisp*1000,dm.maxDisp*1000<10?2:1),unit:' mm',sub:dm.maxDisp>1e-9?`at N${dm.maxDispNode} · span/δ = ${fx(P.L/dm.maxDisp,0)}`:'no displacement'},
+      {label:'Peak axial force',value:fx(Math.abs(maxN),1),unit:' kN',sub:`M${maxNi} (${model.els[maxNi].type}) · ${Math.abs(maxN)<1e-6?'—':maxN>0?'tension':'compression'}`},
+      {label:'Peak von Mises σ',value:fx(maxSig,1),unit:' MPa',sub:'uniaxial: σvm = |σ|'},
+      {label:'Self weight',value:fx(weight,0),unit:' kg',sub:`${fx(weight/P.L,1)} kg/m of span`}
+    ]
+  };
+}
+
+/* =========================================================
+   FRAME / BEAM (3D Euler-Bernoulli, 6 DOF per node)
+   ========================================================= */
+function buildFrame(P){
+  const nodes=[], raw=[];
+  const E=P.E*1e6, nu=P.nu, G=E/(2*(1+nu));
+  const secB=sectionProps(P.bB,P.bH), secC=sectionProps(P.cB,P.cH);
+  const div=Math.max(1,P.div|0);
+  const addNode=(x,y,z)=>{nodes.push([x,y,z]);return nodes.length-1;};
+  const addMember=(n1,n2,type,sec)=>{
+    const p1=nodes[n1],p2=nodes[n2]; let prev=n1; const ids=[n1];
+    for(let k=1;k<=div;k++){
+      const nx=(k===div)?n2:addNode(p1[0]+(p2[0]-p1[0])*k/div,p1[1]+(p2[1]-p1[1])*k/div,p1[2]+(p2[2]-p1[2])*k/div);
+      raw.push({a:prev,b:nx,type,sec}); prev=nx; ids.push(nx);
+    }
+    return ids;
+  };
+  const beamMode=P.frameType==='beam', planar=beamMode||!P.frame3D;
+  const supports=[], spanMid=[], levels=[], gid=[];
+  const supNodes=[];   // {node,dofs,type}
+  if(beamMode){
+    const ns=P.spans;
+    for(let s=0;s<=ns;s++) gid.push(addNode(s*P.Lspan,0,0));
+    for(let s=0;s<ns;s++){ const ids=addMember(gid[s],gid[s+1],'beam',secB); spanMid.push(ids[Math.round((ids.length-1)/2)]); }
+    for(let s=0;s<=ns;s++){
+      const type=s===0?P.bSupL:(s===ns?P.bSupR:'roller');
+      supNodes.push({node:gid[s],type});
+    }
+  } else {
+    const nx=P.baysX, ny=planar?0:P.baysY, ns=P.stories, g=[];
+    for(let k=0;k<=ns;k++){ g[k]=[]; levels[k]=[];
+      for(let j=0;j<=ny;j++){ g[k][j]=[];
+        for(let i=0;i<=nx;i++){ const id=addNode(i*P.bayW,j*P.bayD,k*P.storyH); g[k][j][i]=id; levels[k].push(id); } } }
+    for(let k=1;k<=ns;k++) for(let j=0;j<=ny;j++) for(let i=0;i<=nx;i++) addMember(g[k-1][j][i],g[k][j][i],'column',secC);
+    for(let k=1;k<=ns;k++){
+      for(let j=0;j<=ny;j++) for(let i=0;i<nx;i++) addMember(g[k][j][i],g[k][j][i+1],'beam',secB);
+      for(let j=0;j<ny;j++) for(let i=0;i<=nx;i++) addMember(g[k][j][i],g[k][j+1][i],'beam',secB);
+    }
+    levels[0].forEach(id=>supNodes.push({node:id,type:P.baseSup==='fixed'?'fixed':'pin'}));
+  }
+  const nn=nodes.length, fixed=new Uint8Array(nn*6);
+  if(planar) for(let i=0;i<nn;i++){ fixed[6*i+1]=1; fixed[6*i+3]=1; fixed[6*i+5]=1; }
+  supNodes.forEach(s=>{
+    let ds=[];
+    if(s.type==='pin') ds=[0,1,2];
+    else if(s.type==='roller') ds=[1,2];
+    else if(s.type==='fixed') ds=[0,1,2,3,4,5];
+    ds.forEach(d=>fixed[6*s.node+d]=1);
+    if(s.type!=='free') supports.push({node:s.node,type:s.type});
+  });
+  // loads
+  const F=new Float64Array(nn*6);
+  let weight=0;
+  raw.forEach(r=>{
+    const a=nodes[r.a],b=nodes[r.b], L=Math.hypot(b[0]-a[0],b[1]-a[1],b[2]-a[2]);
+    r.q=[0,0,0];
+    if(r.type==='beam') r.q[2]-=P.wload;
+    const mass=P.rho*r.sec.A*L; weight+=mass;
+    if(P.selfWeight) r.q[2]-=mass*GACC/1000/L;
+  });
+  if(beamMode&&P.Pload>0) spanMid.forEach(n=>F[6*n+2]-=P.Pload);
+  if(!beamMode&&P.Hload>0) for(let k=1;k<levels.length;k++) levels[k].forEach(n=>F[6*n]+=P.Hload/levels[k].length);
+  const els=raw.map(r=>{
+    const a=nodes[r.a],b=nodes[r.b];
+    const dx_=b[0]-a[0],dy_=b[1]-a[1],dz_=b[2]-a[2], L=Math.hypot(dx_,dy_,dz_);
+    const R=localAxes([dx_/L,dy_/L,dz_/L]), sec=r.sec;
+    const kl=beamKeLocal(E,G,sec.A,sec.Iy,sec.Iz,sec.J,L), T=makeT(R), ke=tkt(T,kl);
+    const ql=[0,1,2].map(i=>R[i][0]*r.q[0]+R[i][1]*r.q[1]+R[i][2]*r.q[2]);
+    const L2=L*L/12, h=L/2;
+    const fel=new Float64Array([ql[0]*h,ql[1]*h,ql[2]*h,0,-ql[2]*L2,ql[1]*L2, ql[0]*h,ql[1]*h,ql[2]*h,0,ql[2]*L2,-ql[1]*L2]);
+    for(let i=0;i<12;i++){ let s=0; for(let m=0;m<12;m++) s+=T[m*12+i]*fel[m]; const nd=i<6?r.a:r.b; F[6*nd+(i%6)]+=s; }
+    return {nodes:[r.a,r.b],ke,kl,T,fel,ql,L,sec,type:r.type,rad:Math.max(0.02,0.42*Math.sqrt(sec.b*sec.h))};
+  });
+  return {kind:'frame',nn,dpn:6,axis:[0,1,2,-1,-1,-1],nodes,els,fixed,F,supports,weight,beamMode,planar};
+}
+function postFrame(model,P,u){
+  const lv={axial:[],vm:[],moment:[],util:[]}, info=[];
+  let maxM=0,maxMe=0,maxN=0,maxNe=0,maxV=0,maxUtil=0,maxUe=0;
+  model.els.forEach((el,e)=>{
+    const ug=new Float64Array(12), ul=new Float64Array(12), s=new Float64Array(12);
+    for(let i=0;i<12;i++) ug[i]=u[el.dofs[i]];
+    for(let i=0;i<12;i++){ let v=0; for(let j=0;j<12;j++) v+=el.T[i*12+j]*ug[j]; ul[i]=v; }
+    for(let i=0;i<12;i++){ let v=0; for(let j=0;j<12;j++) v+=el.kl[i*12+j]*ul[j]; s[i]=v-el.fel[i]; }
+    let my=0,mz=0;
+    for(let k=0;k<=4;k++){
+      const x=el.L*k/4;
+      my=Math.max(my,Math.abs(s[4]+x*s[2]+el.ql[2]*x*x/2));
+      mz=Math.max(mz,Math.abs(s[5]-x*s[1]-el.ql[1]*x*x/2));
+    }
+    const N=(s[6]-s[0])/2, V=Math.max(Math.hypot(s[1],s[2]),Math.hypot(s[7],s[8])), sec=el.sec;
+    const sN=N/sec.A/1000;
+    const sig=(Math.abs(N)/sec.A+my*(sec.h/2)/sec.Iy+mz*(sec.b/2)/sec.Iz)/1000;
+    const M=Math.hypot(my,mz), ut=sig/P.fy;
+    lv.axial.push(sN); lv.vm.push(sig); lv.moment.push(M); lv.util.push(ut);
+    info.push({N,V,my,mz,M,sig,ut});
+    if(M>maxM){maxM=M;maxMe=e;} if(Math.abs(N)>Math.abs(maxN)){maxN=N;maxNe=e;}
+    if(V>maxV) maxV=V; if(ut>maxUtil){maxUtil=ut;maxUe=e;}
+  });
+  return {
+    lineVals:lv, util:maxUtil,
+    utilSub:`Governing: E${maxUe} (${model.els[maxUe].type}) · σ = N/A + M/S · fy = ${P.fy} MPa · max V = ${fx(maxV,1)} kN`,
+    lineHover:e=>{ const el=model.els[e], r=info[e];
+      return `<b>E${e}</b> · ${el.type} (N${el.nodes[0]}–N${el.nodes[1]})<br>L = ${fx(el.L)} m · ${fx(el.sec.b*100,0)}×${fx(el.sec.h*100,0)} cm<br>N = <b>${fx(r.N,1)} kN</b> ${Math.abs(r.N)<1e-6?'':r.N>0?'(tension)':'(compression)'}<br>M<sub>y</sub> = ${fx(r.my,1)} · M<sub>z</sub> = ${fx(r.mz,1)} kN·m<br>V = ${fx(r.V,1)} kN<br>σ<sub>max</sub> = ${fx(r.sig,1)} MPa · Util = ${fx(r.ut*100,0)}%`; },
+    _cards:(model,dm,weight)=>[
+      {label:'Max displacement',value:fx(dm.maxDisp*1000,dm.maxDisp*1000<10?2:1),unit:' mm',sub:dm.maxDisp>1e-9?`at N${dm.maxDispNode}`+(model.beamMode?` · span/δ = ${fx(P.Lspan/dm.maxDisp,0)}`:''):'no displacement'},
+      {label:'Peak bending moment',value:fx(maxM,1),unit:' kN·m',sub:`E${maxMe} (${model.els[maxMe].type})`},
+      {label:'Peak axial force',value:fx(Math.abs(maxN),1),unit:' kN',sub:`E${maxNe} (${model.els[maxNe].type}) · ${Math.abs(maxN)<1e-6?'—':maxN>0?'tension':'compression'}`},
+      {label:'Self weight',value:fx(weight,0),unit:' kg',sub:`${model.els.length} beam elements`}
+    ]
+  };
+}
+
+/* =========================================================
+   WALL / DEEP BEAM  (plane stress Q4, XZ plane)
+   ========================================================= */
+function wallKe(xy,c,nu,G,t){
+  const ke=new Float64Array(64);
+  for(const [xi,eta] of GPTS){
+    const s=q4Shape(xi,eta,xy), w=t*s.dJ;
+    for(let a=0;a<8;a++){
+      const xa=(a%2===0)?s.dNdx[a>>1]:0, za=(a%2===1)?s.dNdy[a>>1]:0;
+      for(let b=0;b<8;b++){
+        const xb=(b%2===0)?s.dNdx[b>>1]:0, zb=(b%2===1)?s.dNdy[b>>1]:0;
+        ke[a*8+b]+=w*c*(xa*xb+nu*(xa*zb+za*xb)+za*zb);
+      }
+    }
+  }
+  const s=q4Shape(0,0,xy), w=t*s.dJ*4;
+  for(let a=0;a<8;a++){ const ba=(a%2===0)?s.dNdy[a>>1]:s.dNdx[a>>1];
+    for(let b=0;b<8;b++){ const bb=(b%2===0)?s.dNdy[b>>1]:s.dNdx[b>>1]; ke[a*8+b]+=w*G*ba*bb; } }
+  return ke;
+}
+function buildWall(P){
+  const mx=P.mx|0, mz=P.mz|0, L=P.wallL, H=P.wallH, t=P.wallT/100;
+  const dx=L/mx, dz=H/mz, E=P.E*1e6, nu=P.nu, c=E/(1-nu*nu), G=E/(2*(1+nu));
+  const nn=(mx+1)*(mz+1), nodes=[];
+  for(let k=0;k<=mz;k++) for(let i=0;i<=mx;i++) nodes.push([i*dx,0,k*dz]);
+  const id=(i,k)=>k*(mx+1)+i, used=new Uint8Array(nn), els=[];
+  let weight=0;
+  for(let k=0;k<mz;k++) for(let i=0;i<mx;i++){
+    const cx=(i+.5)*dx, cz=(k+.5)*dz;
+    if(P.hasOpening&&cx>P.openX&&cx<P.openX+P.openW&&cz>P.openZ&&cz<P.openZ+P.openH) continue;
+    const n=[id(i,k),id(i+1,k),id(i+1,k+1),id(i,k+1)];
+    const xy=n.map(q=>[nodes[q][0],nodes[q][2]]);
+    els.push({nodes:n,ke:wallKe(xy,c,nu,G,t),xy,area:dx*dz,c,nu,G});
+    n.forEach(q=>used[q]=1); weight+=P.rho*t*dx*dz;
+  }
+  const fixed=new Uint8Array(nn*2), supports=[];
+  for(let q=0;q<nn;q++) if(!used[q]){ fixed[2*q]=1; fixed[2*q+1]=1; }
+  const fix=(q,ds)=>{ if(!used[q]) return; ds.forEach(d=>fixed[2*q+d]=1); };
+  if(P.wallSup==='base'){ for(let i=0;i<=mx;i++){ fix(id(i,0),[0,1]); if(used[id(i,0)]) supports.push({node:id(i,0),type:'fixed'}); } }
+  else if(P.wallSup==='cantilever'){ for(let k=0;k<=mz;k++){ fix(id(0,k),[0,1]); if(used[id(0,k)]) supports.push({node:id(0,k),type:'fixed'}); } }
+  else {
+    for(let i=0;i<=mx;i++){
+      const x=i*dx, q=id(i,0);
+      if(i===0||x<=P.supLen+1e-9||i===mx||x>=L-P.supLen-1e-9){ fix(q,[1]); if(used[q]) supports.push({node:q,type:(i===0?'pin':'roller')}); }
+    }
+    fix(id(0,0),[0]);
+  }
+  const F=new Float64Array(nn*2);
+  const top=[]; for(let i=0;i<=mx;i++) if(used[id(i,mz)]) top.push(i);
+  if(P.wload>0) top.forEach(i=>{ const trib=(i===0||i===mx)?dx/2:dx; F[2*id(i,mz)+1]-=P.wload*trib; });
+  if(P.Hload>0&&top.length) top.forEach(i=>F[2*id(i,mz)]+=P.Hload/top.length);
+  if(P.Pload>0&&top.length){ let best=top[0]; top.forEach(i=>{ if(Math.abs(i*dx-L/2)<Math.abs(best*dx-L/2)) best=i; }); F[2*id(best,mz)+1]-=P.Pload; }
+  if(P.selfWeight) els.forEach(el=>{ const w=P.rho*t*el.area*GACC/1000/4; el.nodes.forEach(q=>F[2*q+1]-=w); });
+  return {kind:'wall',nn,dpn:2,axis:[0,2],nodes,els,fixed,F,supports,weight,used,t};
+}
+function nodalAvg(nn,els,arrs){
+  const out=arrs.map(()=>new Float64Array(nn)), cnt=new Float64Array(nn);
+  els.forEach((el,e)=>el.nodes.forEach(n=>{ cnt[n]++; arrs.forEach((a,q)=>out[q][n]+=a[e]); }));
+  for(let n=0;n<nn;n++) if(cnt[n]) out.forEach(o=>o[n]/=cnt[n]);
+  return out;
+}
+function postWall(model,P,u){
+  const sx=[],sz=[],tau=[],vm=[],p1=[],p3=[];
+  let maxVm=0,maxVe=0,maxP1=-1e18,minP3=1e18;
+  model.els.forEach((el,e)=>{
+    const s=q4Shape(0,0,el.xy); let ex=0,ez=0,g=0;
+    for(let i=0;i<4;i++){ const ux=u[2*el.nodes[i]], uz=u[2*el.nodes[i]+1]; ex+=s.dNdx[i]*ux; ez+=s.dNdy[i]*uz; g+=s.dNdy[i]*ux+s.dNdx[i]*uz; }
+    const a=el.c*(ex+el.nu*ez)/1000, b=el.c*(el.nu*ex+ez)/1000, ta=el.G*g/1000;
+    sx.push(a); sz.push(b); tau.push(ta);
+    const v=Math.sqrt(Math.max(0,a*a-a*b+b*b+3*ta*ta)); vm.push(v);
+    const m=(a+b)/2, r=Math.hypot((a-b)/2,ta); p1.push(m+r); p3.push(m-r);
+    if(v>maxVm){maxVm=v;maxVe=e;} if(m+r>maxP1) maxP1=m+r; if(m-r<minP3) minP3=m-r;
+  });
+  const [nvm,ns1,ns2,nt]=nodalAvg(model.nn,model.els,[vm,sx,sz,tau]);
+  if(!model.els.length){ maxP1=0; minP3=0; }
+  return {
+    nodeVals:{vm:nvm,s1:ns1,s2:ns2,t12:nt}, util:maxVm/P.fy,
+    utilSub:`Peak von Mises at element ${model.els.length?maxVe:'—'} (element-centre value) · fy = ${P.fy} MPa`,
+    elHover:e=>`<b>Element ${e}</b><br>σx = ${fx(sx[e],2)} · σz = ${fx(sz[e],2)} MPa<br>τxz = ${fx(tau[e],2)} MPa<br>σvm = <b>${fx(vm[e],2)} MPa</b><br>σ1 = ${fx(p1[e],2)} · σ3 = ${fx(p3[e],2)} MPa`,
+    _cards:(model,dm,weight)=>[
+      {label:'Max displacement',value:fx(dm.maxDisp*1000,dm.maxDisp*1000<10?3:1),unit:' mm',sub:dm.maxDisp>1e-9?`at N${dm.maxDispNode} · L/δ = ${fx(P.wallL/dm.maxDisp,0)}`:'no displacement'},
+      {label:'Peak von Mises σ',value:fx(maxVm,2),unit:' MPa',sub:'plane stress, element centre'},
+      {label:'Max tensile σ1',value:fx(Math.max(0,maxP1),2),unit:' MPa',sub:'principal stress'},
+      {label:'Max compressive σ3',value:fx(Math.abs(Math.min(0,minP3)),2),unit:' MPa',sub:`weight ${fx(weight,0)} kg`}
+    ]
+  };
+}
+
+/* =========================================================
+   SLAB / PLATE  (Mindlin-Reissner Q4, selective reduced integration)
+   DOF per node: w (up), bx, by  (u = z·bx, v = z·by)
+   ========================================================= */
+function slabKe(xy,D0,nu,Gs){
+  const ke=new Float64Array(144);
+  const Db=[[D0,D0*nu,0],[D0*nu,D0,0],[0,0,D0*(1-nu)/2]];
+  const addBtDB=(B,D,rows,w)=>{
+    for(let a=0;a<12;a++) for(let b=0;b<12;b++){
+      let s=0; for(let i=0;i<rows;i++) for(let j=0;j<rows;j++) s+=B[i][a]*D[i][j]*B[j][b];
+      ke[a*12+b]+=w*s;
+    }
+  };
+  for(const [xi,eta] of GPTS){
+    const s=q4Shape(xi,eta,xy), B=[new Array(12).fill(0),new Array(12).fill(0),new Array(12).fill(0)];
+    for(let i=0;i<4;i++){ B[0][3*i+1]=s.dNdx[i]; B[1][3*i+2]=s.dNdy[i]; B[2][3*i+1]=s.dNdy[i]; B[2][3*i+2]=s.dNdx[i]; }
+    addBtDB(B,Db,3,s.dJ);
+  }
+  const s=q4Shape(0,0,xy), B=[new Array(12).fill(0),new Array(12).fill(0)];
+  for(let i=0;i<4;i++){ B[0][3*i]=s.dNdx[i]; B[0][3*i+1]=s.N[i]; B[1][3*i]=s.dNdy[i]; B[1][3*i+2]=s.N[i]; }
+  addBtDB(B,[[Gs,0],[0,Gs]],2,4*s.dJ);
+  return ke;
+}
+function buildSlab(P){
+  const mx=P.msx|0, my=P.msy|0, Lx=P.slabLx, Ly=P.slabLy, t=P.slabT/100;
+  const dx=Lx/mx, dy=Ly/my, E=P.E*1e6, nu=P.nu, G=E/(2*(1+nu));
+  const D0=E*t*t*t/(12*(1-nu*nu)), Gs=(5/6)*G*t;
+  const nn=(mx+1)*(my+1), nodes=[];
+  for(let j=0;j<=my;j++) for(let i=0;i<=mx;i++) nodes.push([i*dx,j*dy,0]);
+  const id=(i,j)=>j*(mx+1)+i, els=[];
+  const proto=slabKe([[0,0],[dx,0],[dx,dy],[0,dy]],D0,nu,Gs);
+  for(let j=0;j<my;j++) for(let i=0;i<mx;i++){
+    const n=[id(i,j),id(i+1,j),id(i+1,j+1),id(i,j+1)];
+    els.push({nodes:n,ke:proto,xy:n.map(q=>[nodes[q][0],nodes[q][1]]),area:dx*dy,D0,nu,t});
+  }
+  const fixed=new Uint8Array(nn*3), supports=[];
+  const fixN=(q,type)=>{ if(type==='free') return; fixed[3*q]=1; if(type==='clamped'){ fixed[3*q+1]=1; fixed[3*q+2]=1; } };
+  const edges=[['eL',(k)=>id(0,k),my],['eR',(k)=>id(mx,k),my],['eF',(k)=>id(k,0),mx],['eB',(k)=>id(k,my),mx]];
+  edges.forEach(([key,fn,cnt])=>{ for(let k=0;k<=cnt;k++){ const q=fn(k); fixN(q,P[key]); if(P[key]!=='free') supports.push({node:q,type:P[key]==='clamped'?'fixed':'pin'}); } });
+  const F=new Float64Array(nn*3);
+  const qtot=P.qload+(P.selfWeight?P.rho*GACC*t/1000:0);
+  els.forEach(el=>el.nodes.forEach(q=>F[3*q]-=qtot*el.area/4));
+  if(P.Pload>0){
+    let best=0,bd=1e18; nodes.forEach((p,q)=>{ const d=Math.hypot(p[0]-Lx/2,p[1]-Ly/2); if(d<bd-1e-9){bd=d;best=q;} });
+    F[3*best]-=P.Pload;
+  }
+  const weight=P.rho*t*Lx*Ly;
+  return {kind:'slab',nn,dpn:3,axis:[2,-1,-1],nodes,els,fixed,F,supports,weight,t,D0,nu};
+}
+function postSlab(model,P,u){
+  const Mx=[],My=[],Mxy=[],sx=[],sy=[],tau=[],vm=[], t=model.t, D0=model.D0, nu=model.nu;
+  let maxVm=0,maxVe=0,maxMo=0;
+  model.els.forEach((el,e)=>{
+    const s=q4Shape(0,0,el.xy); let kx=0,ky=0,kxy=0;
+    for(let i=0;i<4;i++){ const bx=u[3*el.nodes[i]+1], by=u[3*el.nodes[i]+2]; kx+=s.dNdx[i]*bx; ky+=s.dNdy[i]*by; kxy+=s.dNdy[i]*bx+s.dNdx[i]*by; }
+    const mx=D0*(kx+nu*ky), my=D0*(nu*kx+ky), mxy=D0*(1-nu)/2*kxy;
+    Mx.push(mx);My.push(my);Mxy.push(mxy);
+    const f=6/(t*t)/1000, a=mx*f, b=my*f, ta=mxy*f;
+    sx.push(a);sy.push(b);tau.push(ta);
+    const v=Math.sqrt(Math.max(0,a*a-a*b+b*b+3*ta*ta)); vm.push(v);
+    if(v>maxVm){maxVm=v;maxVe=e;} maxMo=Math.max(maxMo,Math.abs(mx),Math.abs(my));
+  });
+  const [nvm,ns1,ns2,nt]=nodalAvg(model.nn,model.els,[vm,sx,sy,tau]);
+  return {
+    nodeVals:{vm:nvm,s1:ns1,s2:ns2,t12:nt}, util:maxVm/P.fy,
+    utilSub:`Peak von Mises at element ${maxVe} (top fibre, element-centre) · fy = ${P.fy} MPa`,
+    elHover:e=>`<b>Element ${e}</b><br>Mx = ${fx(Mx[e],2)} · My = ${fx(My[e],2)} · Mxy = ${fx(Mxy[e],2)} kN·m/m<br>σx = ${fx(sx[e],2)} · σy = ${fx(sy[e],2)} MPa<br>τxy = ${fx(tau[e],2)} MPa<br>σvm(top) = <b>${fx(vm[e],2)} MPa</b>`,
+    _cards:(model,dm,weight)=>[
+      {label:'Max deflection',value:fx(dm.maxDisp*1000,dm.maxDisp*1000<10?3:1),unit:' mm',sub:dm.maxDisp>1e-9?`at N${dm.maxDispNode} · span/δ = ${fx(Math.min(P.slabLx,P.slabLy)/dm.maxDisp,0)}`:'no deflection'},
+      {label:'Peak von Mises σ',value:fx(maxVm,2),unit:' MPa',sub:'top fibre, element centre'},
+      {label:'Peak moment max(|Mx|,|My|)',value:fx(maxMo,2),unit:' kN·m/m',sub:'per metre width'},
+      {label:'Self weight',value:fx(weight,0),unit:' kg',sub:`${fx(weight/(P.slabLx*P.slabLy),0)} kg/m²`}
+    ]
+  };
+}
+
+/* =========================================================
+   DISPATCH
+   ========================================================= */
+function buildModel(P){
+  let m;
+  switch(P.struct){ case 'frame': m=buildFrame(P); break; case 'wall': m=buildWall(P); break; case 'slab': m=buildSlab(P); break; default: m=buildTruss(P); }
+  const mn=[1e18,1e18,1e18], mxv=[-1e18,-1e18,-1e18];
+  m.nodes.forEach(p=>{ for(let k=0;k<3;k++){ mn[k]=Math.min(mn[k],p[k]); mxv[k]=Math.max(mxv[k],p[k]); } });
+  m.min=mn; m.max=mxv; m.size=Math.max(mxv[0]-mn[0],mxv[1]-mn[1],mxv[2]-mn[2],1e-6);
+  m.isLine=(m.kind==='truss'||m.kind==='frame');
+  return m;
+}
+function solveAndPost(model,P){
+  const sol=femSolve(model);
+  const nn=model.nn;
+  let u=sol.u;
+  const dmag=new Float64Array(nn); let maxDisp=0,maxDispNode=0; const o=[0,0,0];
+  let post=null;
+  if(!sol.tooLarge){
+    if(!sol.unstable){
+      for(let i=0;i<nn;i++){ disp3(model,u,i,o); const d=Math.hypot(o[0],o[1],o[2]); dmag[i]=d; if(d>maxDisp){maxDisp=d;maxDispNode=i;} }
+      if(!(maxDisp<1e4)) { sol.unstable=true; }
+    }
+    if(sol.unstable){ u=new Float64Array(sol.nd); maxDisp=0; dmag.fill(0); }
+    post=model.kind==='truss'?postTruss(model,P,u):model.kind==='frame'?postFrame(model,P,u):model.kind==='wall'?postWall(model,P,u):postSlab(model,P,u);
+  }
+  const res={u,unstable:sol.unstable,tooLarge:sol.tooLarge,ms:sol.ms,nf:sol.nf,bw:sol.bw,sumF:sol.sumF,sumR:sol.sumR,dmag,maxDisp,maxDispNode,weight:model.weight};
+  if(post){ Object.assign(res,post); res.cards=post._cards(model,{maxDisp,maxDispNode},model.weight); }
+  else { res.util=0; res.utilSub='—'; res.cards=[0,1,2,3].map(()=>({label:'—',value:'—',unit:'',sub:''})); }
+  if(res.unstable&&model.isLine){ const z=model.els.map(()=>0); res.lineVals={axial:z,vm:z,moment:z,util:z}; res.lineHover=()=>'unstable'; }
+  if(res.unstable&&!model.isLine){ const z=new Float64Array(nn); res.nodeVals={vm:z,s1:z,s2:z,t12:z}; res.elHover=()=>'unstable'; }
+  return res;
+}
+/*==ENGINE-END==*/
+
+/* =========================================================
+   UI DEFINITION
+   ========================================================= */
+const $ = id => document.getElementById(id);
+let P = { ...DEFAULTS };
+const isT=p=>p.struct==='truss', isF=p=>p.struct==='frame', isW=p=>p.struct==='wall', isS=p=>p.struct==='slab';
+const isBeam=p=>p.struct==='frame'&&p.frameType==='beam', isBldg=p=>p.struct==='frame'&&p.frameType==='frame';
+
+const COLOR_MODES = {
+  truss:[['axial','Axial stress (signed)'],['vm','Von Mises |σ|'],['util','Utilization ratio']],
+  frame:[['vm','Peak combined stress |σ|'],['moment','Bending moment |M|'],['axial','Axial stress (signed)'],['util','Utilization ratio']],
+  wall: [['vm','Von Mises σ'],['s1','σx (horizontal)'],['s2','σz (vertical)'],['t12','τxz (shear)'],['disp','Displacement |u|']],
+  slab: [['vm','Von Mises σ (top fibre)'],['s1','σx (top fibre)'],['s2','σy (top fibre)'],['t12','τxy (top fibre)'],['disp','Deflection |w|']]
+};
+const META = {
+  axial:{t:'Axial stress (MPa)',signed:true,note:'blue = compression · red = tension',d:1},
+  vm:{t:'Von Mises / peak stress (MPa)',signed:false,note:'blue = low · red = high',d:2},
+  moment:{t:'Bending moment |M| (kN·m)',signed:false,note:'resultant of My and Mz, max along member',d:1},
+  util:{t:'Utilization ratio (–)',signed:false,note:'red ≥ 1.0 = overstressed',d:2,cap:1},
+  s1:{t:'Normal stress σ1 (MPa)',signed:true,note:'blue = compression · red = tension',d:2},
+  s2:{t:'Normal stress σ2 (MPa)',signed:true,note:'blue = compression · red = tension',d:2},
+  t12:{t:'Shear stress τ (MPa)',signed:true,note:'blue = negative · red = positive',d:2},
+  disp:{t:'Displacement (mm)',signed:false,note:'blue = zero · red = maximum',d:3}
+};
+
+const UI = [
+ { title:'Structure', items:[
+   {type:'select',id:'struct',label:'Structure type',opts:[['truss','Truss (space / planar)'],['frame','Line: beam & frame'],['wall','Plane: wall / deep beam'],['slab','Plane: slab / plate']],tip:'Truss: pin-jointed bars. Line: beam elements with bending (continuous beam or multi-story frame). Plane: wall (plane stress) or slab (plate bending) shell mesh.'}
+ ]},
+ { title:'Geometry · Truss', items:[
+   {type:'select',id:'topo',label:'Truss type',show:isT,opts:[['pratt','Pratt'],['howe','Howe'],['warren','Warren']],tip:'Web topology.'},
+   {type:'toggle',id:'is3D',label:'Space truss (3D)',show:isT,tip:'ON: two parallel trusses with bracing. OFF: single planar truss.'},
+   {type:'slider',id:'L',label:'Span length',unit:'m',min:4,max:60,step:0.5,show:isT},
+   {type:'slider',id:'H',label:'Structural depth',unit:'m',min:0.5,max:10,step:0.1,show:isT},
+   {type:'slider',id:'n',label:'Subdivisions',unit:'',min:2,max:24,step:2,show:isT},
+   {type:'slider',id:'W',label:'Width (3D only)',unit:'m',min:0.5,max:8,step:0.1,show:p=>isT(p)&&p.is3D}
+ ]},
+ { title:'Geometry · Beam / Frame', items:[
+   {type:'select',id:'frameType',label:'Line structure',show:isF,opts:[['beam','Continuous beam'],['frame','Multi-story frame']],tip:'Continuous beam along X, or a portal / multi-story frame (2D or 3D).'},
+   {type:'slider',id:'spans',label:'Number of spans',unit:'',min:1,max:4,step:1,show:isBeam},
+   {type:'slider',id:'Lspan',label:'Span length',unit:'m',min:2,max:15,step:0.5,show:isBeam},
+   {type:'slider',id:'baysX',label:'Bays in X',unit:'',min:1,max:5,step:1,show:isBldg},
+   {type:'slider',id:'bayW',label:'Bay width (X)',unit:'m',min:2,max:10,step:0.5,show:isBldg},
+   {type:'slider',id:'stories',label:'Stories',unit:'',min:1,max:8,step:1,show:isBldg},
+   {type:'slider',id:'storyH',label:'Story height',unit:'m',min:2.5,max:5,step:0.1,show:isBldg},
+   {type:'toggle',id:'frame3D',label:'3D space frame',show:isBldg,tip:'ON: adds bays in Y with beams in both directions. OFF: planar frame in the XZ plane.'},
+   {type:'slider',id:'baysY',label:'Bays in Y',unit:'',min:1,max:3,step:1,show:p=>isBldg(p)&&p.frame3D},
+   {type:'slider',id:'bayD',label:'Bay depth (Y)',unit:'m',min:2,max:10,step:0.5,show:p=>isBldg(p)&&p.frame3D},
+   {type:'slider',id:'div',label:'Elements per member',unit:'',min:1,max:4,step:1,show:isF,tip:'Mesh refinement along each member. More elements give smoother moment colours and deformed shape.'}
+ ]},
+ { title:'Geometry · Wall', items:[
+   {type:'slider',id:'wallL',label:'Length (X)',unit:'m',min:2,max:30,step:0.5,show:isW},
+   {type:'slider',id:'wallH',label:'Height (Z)',unit:'m',min:1,max:15,step:0.5,show:isW},
+   {type:'slider',id:'wallT',label:'Thickness',unit:'cm',min:10,max:60,step:1,show:isW},
+   {type:'slider',id:'mx',label:'Mesh elements X',unit:'',min:4,max:40,step:1,show:isW},
+   {type:'slider',id:'mz',label:'Mesh elements Z',unit:'',min:4,max:30,step:1,show:isW},
+   {type:'toggle',id:'hasOpening',label:'Rectangular opening',show:isW,tip:'Removes the elements inside a rectangular window or door opening.'},
+   {type:'slider',id:'openW',label:'Opening width',unit:'m',min:0.5,max:10,step:0.1,show:p=>isW(p)&&p.hasOpening},
+   {type:'slider',id:'openH',label:'Opening height',unit:'m',min:0.5,max:8,step:0.1,show:p=>isW(p)&&p.hasOpening},
+   {type:'slider',id:'openX',label:'Opening X position',unit:'m',min:0,max:25,step:0.1,show:p=>isW(p)&&p.hasOpening,tip:'Distance from the left edge to the opening.'},
+   {type:'slider',id:'openZ',label:'Opening Z position',unit:'m',min:0,max:12,step:0.1,show:p=>isW(p)&&p.hasOpening,tip:'Distance from the bottom edge to the opening.'}
+ ]},
+ { title:'Geometry · Slab', items:[
+   {type:'slider',id:'slabLx',label:'Length X',unit:'m',min:2,max:15,step:0.5,show:isS},
+   {type:'slider',id:'slabLy',label:'Length Y',unit:'m',min:2,max:15,step:0.5,show:isS},
+   {type:'slider',id:'slabT',label:'Thickness',unit:'cm',min:8,max:50,step:1,show:isS},
+   {type:'slider',id:'msx',label:'Mesh elements X',unit:'',min:4,max:32,step:1,show:isS},
+   {type:'slider',id:'msy',label:'Mesh elements Y',unit:'',min:4,max:32,step:1,show:isS}
+ ]},
+ { title:'Material & Section', items:[
+   {type:'select',id:'mat',label:'Material preset',opts:[['steel','Steel S355'],['aluminum','Aluminum 6061-T6'],['timber','Timber GL24h'],['concrete','Concrete C30'],['custom','Custom']],tip:'Presets set E, strength, density and Poisson ratio. Editing any of them switches to Custom.'},
+   {type:'slider',id:'A',label:'Bar area A',unit:'cm²',min:1,max:300,step:1,show:isT,tip:'Same area for all bars. Euler check assumes a hollow tube with D/t = 20.'},
+   {type:'slider',id:'bB',label:'Beam width b',unit:'cm',min:10,max:80,step:1,show:isF,tip:'Rectangular beam section, width b.'},
+   {type:'slider',id:'bH',label:'Beam depth h',unit:'cm',min:10,max:120,step:1,show:isF,tip:'Rectangular beam section, depth h (strong axis bending).'},
+   {type:'slider',id:'cB',label:'Column width b',unit:'cm',min:10,max:100,step:1,show:isBldg},
+   {type:'slider',id:'cH',label:'Column depth h',unit:'cm',min:10,max:100,step:1,show:isBldg},
+   {type:'slider',id:'E',label:"Young's modulus E",unit:'GPa',min:5,max:250,step:1},
+   {type:'slider',id:'nu',label:"Poisson's ratio ν",unit:'',min:0,max:0.45,step:0.01,show:p=>!isT(p)},
+   {type:'slider',id:'fy',label:'Strength fy',unit:'MPa',min:10,max:600,step:5,tip:'Yield / characteristic strength for the utilization ratio (uniform elastic check, no cracking).'},
+   {type:'slider',id:'rho',label:'Density ρ',unit:'kg/m³',min:300,max:8000,step:50},
+   {type:'toggle',id:'buckling',label:'Euler buckling check',show:isT,tip:'Compression bars are also checked against Pcr = π²EI/L².'}
+ ]},
+ { title:'Supports & Loads', items:[
+   {type:'select',id:'supL',label:'Left support (x = 0)',show:isT,opts:[['pin','Pin'],['roller','Roller'],['fixed','Fixed']]},
+   {type:'select',id:'supR',label:'Right support (x = L)',show:isT,opts:[['roller','Roller'],['pin','Pin'],['fixed','Fixed']]},
+   {type:'select',id:'bSupL',label:'Left end support',show:isBeam,opts:[['pin','Pin'],['roller','Roller'],['fixed','Fixed (clamped)'],['free','Free (cantilever tip)']]},
+   {type:'select',id:'bSupR',label:'Right end support',show:isBeam,opts:[['roller','Roller'],['pin','Pin'],['fixed','Fixed (clamped)'],['free','Free (cantilever tip)']],tip:'Interior supports of continuous beams are rollers (vertical restraint).'},
+   {type:'select',id:'baseSup',label:'Column base',show:isBldg,opts:[['fixed','Fixed'],['pin','Pinned']]},
+   {type:'select',id:'wallSup',label:'Wall supports',show:isW,opts:[['twopoints','Deep beam: two end supports'],['base','Wall: fixed base'],['cantilever','Cantilever: left edge fixed']]},
+   {type:'slider',id:'supLen',label:'Support length',unit:'m',min:0.25,max:5,step:0.25,show:p=>isW(p)&&p.wallSup==='twopoints',tip:'Bearing length at each end of the deep beam.'},
+   {type:'select',id:'eL',label:'Edge x = 0',show:isS,opts:[['ss','Simply supported'],['clamped','Clamped'],['free','Free']]},
+   {type:'select',id:'eR',label:'Edge x = Lx',show:isS,opts:[['ss','Simply supported'],['clamped','Clamped'],['free','Free']]},
+   {type:'select',id:'eF',label:'Edge y = 0',show:isS,opts:[['ss','Simply supported'],['clamped','Clamped'],['free','Free']]},
+   {type:'select',id:'eB',label:'Edge y = Ly',show:isS,opts:[['ss','Simply supported'],['clamped','Clamped'],['free','Free']]},
+   {type:'select',id:'loadMode',label:'Load case',show:isT,opts:[['both','Point + UDL'],['point','Point load only'],['udl','UDL only']]},
+   {type:'select',id:'loadPos',label:'Load on chord',show:isT,opts:[['top','Top chord'],['bottom','Bottom chord']]},
+   {type:'slider',id:'Pload',label:p=>isT(p)?'Point load (midspan)':isBeam(p)?'Point load per span':isW(p)?'Point load (top, midspan)':'Point load (centre)',unit:'kN',min:0,max:1000,step:5,show:p=>!isBldg(p),tip:'Gravity point load. Beam: applied at the middle of each span.'},
+   {type:'slider',id:'wload',label:p=>isT(p)?'UDL intensity':isF(p)?'UDL on beams':'Line load on top edge',unit:'kN/m',min:0,max:300,step:1,show:p=>!isS(p),tip:'Gravity line load. Truss: lumped to chord nodes. Frame: on all beams. Wall: along the top edge.'},
+   {type:'slider',id:'qload',label:'Surface pressure q',unit:'kN/m²',min:0,max:50,step:0.5,show:isS,tip:'Uniform gravity pressure on the slab.'},
+   {type:'slider',id:'Hload',label:p=>isBldg(p)?'Lateral load per floor (+X)':'Lateral load on top edge (+X)',unit:'kN',min:0,max:500,step:5,show:p=>isBldg(p)||isW(p),tip:'Horizontal load (wind / seismic), shared equally by the nodes of each floor or of the top edge.'},
+   {type:'toggle',id:'selfWeight',label:'Include self-weight'}
+ ]},
+ { title:'Display', items:[
+   {type:'select',id:'colorMode',label:'Color by',opts:[],tip:'Rainbow scale: blue = low, red = high.'},
+   {type:'toggle',id:'autoScale',label:'Auto deformation scale'},
+   {type:'slider',id:'defScale',label:'Deformation scale',unit:'×',min:1,max:2000,step:1,tip:'Manual exaggeration factor of displacements.'}
+ ]}
+];
+
+const ctl = {}, visRegistry = [];
+const mk = h => { const d=document.createElement('div'); d.innerHTML=h.trim(); return d.firstElementChild; };
+const decs = s => (String(s).split('.')[1]||'').length;
+const labelOf = it => typeof it.label==='function'?it.label(P):it.label;
+
+function field(it){
+  const tip = it.tip?`<span class="tip" data-tip="${it.tip}">?</span>`:'';
+  let el;
+  if(it.type==='slider'){
+    el=mk(`<div class="mb-3"><div class="flex items-center justify-between mb-1"><label class="text-[11px] text-slate-300 flex items-center gap-1.5"><span class="lt">${labelOf(it)}</span>${tip}</label><div class="flex items-center gap-1"><input type="number" class="num"><span class="text-[10px] text-slate-500 w-10">${it.unit}</span></div></div><input type="range"></div>`);
+    const rng=el.querySelector('input[type=range]'), num=el.querySelector('input[type=number]'), d=decs(it.step);
+    [rng,num].forEach(i=>{i.min=it.min;i.max=it.max;i.step=it.step;});
+    const setSilent=v=>{ v=Math.min(it.max,Math.max(it.min,v)); P[it.id]=v; rng.value=v; num.value=v.toFixed(d); };
+    const change=v=>{ if(isNaN(v)) return; setSilent(v); onChange(it.id); };
+    rng.oninput=()=>change(parseFloat(rng.value)); num.onchange=()=>change(parseFloat(num.value));
+    ctl[it.id]={el,set:setSilent,disable:f=>{rng.disabled=f;num.disabled=f;el.style.opacity=f?.45:1;}};
+  } else if(it.type==='select'){
+    el=mk(`<div class="mb-3"><label class="text-[11px] text-slate-300 flex items-center gap-1.5 mb-1"><span class="lt">${labelOf(it)}</span>${tip}</label><select class="sel"></select></div>`);
+    const s=el.querySelector('select');
+    const setOpts=opts=>{ s.innerHTML=opts.map(o=>`<option value="${o[0]}">${o[1]}</option>`).join(''); };
+    setOpts(it.opts);
+    s.onchange=()=>{ P[it.id]=s.value; onChange(it.id); };
+    ctl[it.id]={el,set:v=>{P[it.id]=v;s.value=v;},disable:()=>{},setOpts};
+  } else {
+    el=mk(`<label class="mb-3 flex items-center justify-between text-[11px] text-slate-300 cursor-pointer"><span class="flex items-center gap-1.5"><span class="lt">${labelOf(it)}</span>${tip}</span><input type="checkbox" style="accent-color:#ff9f2e;width:15px;height:15px"></label>`);
+    const c=el.querySelector('input');
+    c.onchange=()=>{ P[it.id]=c.checked; onChange(it.id); };
+    ctl[it.id]={el,set:v=>{P[it.id]=v;c.checked=v;},disable:()=>{}};
+  }
+  visRegistry.push({el,it});
+  return el;
+}
+const cardEls=[];
+UI.forEach(card=>{
+  const sec=mk(`<section class="mb-3 rounded-lg border border-white/10 bg-white/[0.03] overflow-hidden"><header class="flex items-center justify-between px-3 py-1.5 bg-white/[0.05] border-b border-white/10"><div class="flex items-center gap-2"><span class="port"></span><span class="text-[11px] font-semibold tracking-wider uppercase text-slate-200">${card.title}</span></div><span class="port out"></span></header><div class="p-3 pb-0"></div></section>`);
+  const body=sec.lastElementChild, els=[];
+  card.items.forEach(it=>{ const e=field(it); body.appendChild(e); els.push({e,it}); });
+  $('panels').appendChild(sec); cardEls.push({sec,els});
+});
+$('panels').appendChild(mk(`<details class="text-[10px] text-slate-500 mb-4"><summary class="cursor-pointer text-slate-400">Assumptions &amp; element types</summary><ul class="list-disc pl-4 mt-1 space-y-0.5"><li>Truss: pin-jointed bar elements, 3 DOF/node.</li><li>Beam/frame: 3D Euler-Bernoulli beam, 6 DOF/node, rigid joints, rectangular sections. σ<sub>max</sub> = N/A + M<sub>y</sub>/S<sub>y</sub> + M<sub>z</sub>/S<sub>z</sub> (conservative, uncracked elastic).</li><li>Wall: plane-stress Q4 elements (selective reduced integration), XZ plane. Stresses are element-centre values, smoothed to nodes for display.</li><li>Slab: Mindlin-Reissner Q4 plate (w, θx, θy), shear-locking controlled by reduced integration. Stresses at the top fibre, σ = 6M/t².</li><li>Linear elastic, small displacements. Units: m, kN, GPa, MPa.</li><li>Utilization = σ/fy (not a code check; no load factors, no concrete cracking or reinforcement design).</li></ul></details>`));
+
+function applyVisibility(){
+  visRegistry.forEach(({el,it})=>{
+    const vis=it.show?it.show(P):true; el.style.display=vis?'':'none';
+    const lt=el.querySelector('.lt'); if(lt&&typeof it.label==='function') lt.textContent=it.label(P);
+  });
+  cardEls.forEach(c=>{ c.sec.style.display=c.els.some(({e})=>e.style.display!=='none')?'':'none'; });
+  $('pillMesh').style.display=(P.struct==='wall'||P.struct==='slab')?'':'none';
+}
+function updateDisabled(){
+  ctl.Pload.disable(isT(P)&&P.loadMode==='udl');
+  ctl.wload.disable(isT(P)&&P.loadMode==='point');
+  ctl.defScale.disable(P.autoScale);
+}
+function syncUI(){
+  ctl.colorMode.setOpts(COLOR_MODES[P.struct]);
+  if(!COLOR_MODES[P.struct].some(o=>o[0]===P.colorMode)) P.colorMode=COLOR_MODES[P.struct][0][0];
+  Object.keys(ctl).forEach(k=>ctl[k].set(P[k]));
+  applyVisibility(); updateDisabled();
+}
+let needFit=true;
+function onChange(id){
+  if(id==='struct'){ Object.assign(P,PRESETS[P.struct]); syncUI(); needFit=true; }
+  else if(id==='mat'&&P.mat!=='custom'){ const m=MATS[P.mat]; ctl.E.set(m.E); ctl.fy.set(m.fy); ctl.rho.set(m.rho); ctl.nu.set(m.nu); }
+  else if(['E','fy','rho','nu'].includes(id)&&P.mat!=='custom') ctl.mat.set('custom');
+  if(id==='frameType'||id==='frame3D') needFit=true;
+  applyVisibility(); updateDisabled(); requestUpdate();
+}
+
+/* =========================================================
+   THREE.JS VIEWPORT
+   ========================================================= */
+const host=$('canvasHost');
+const renderer=new THREE.WebGLRenderer({antialias:true,alpha:true});
+renderer.setPixelRatio(Math.min(window.devicePixelRatio,2)); renderer.setClearColor(0x000000,0);
+host.appendChild(renderer.domElement);
+const scene=new THREE.Scene();
+const camera=new THREE.PerspectiveCamera(45,1,0.05,3000); camera.up.set(0,0,1);
+const controls=new OrbitControls(camera,renderer.domElement);
+controls.enableDamping=true; controls.dampingFactor=0.08;
+scene.add(new THREE.AmbientLight(0xffffff,0.55)); scene.add(new THREE.HemisphereLight(0xbfd4ff,0x202530,0.6));
+const dl=new THREE.DirectionalLight(0xffffff,1.1); dl.position.set(30,-40,60); scene.add(dl);
+const dl2=new THREE.DirectionalLight(0x88aaff,0.45); dl2.position.set(-30,40,20); scene.add(dl2);
+const grid=new THREE.GridHelper(400,400,0x2e3850,0x1a2132); grid.rotation.x=Math.PI/2; grid.position.z=-0.03; scene.add(grid);
+const axes=new THREE.AxesHelper(1); scene.add(axes);
+
+const cylGeo=new THREE.CylinderGeometry(1,1,1,10,1), sphGeo=new THREE.SphereGeometry(1,14,10);
+let memMesh=null,nodeMesh=null,wire=null,surf=null;
+const loadGroup=new THREE.Group(), supGroup=new THREE.Group(); scene.add(loadGroup,supGroup);
+let renderedPos=new Float32Array(0), labelEls=[];
+const TG={orig:true,def:true,stress:true,mesh:true,labels:false,loads:true,supports:true,grid:true};
+let lastModel=null,lastRes=null;
+
+function resize(){
+  const w=host.clientWidth,h=host.clientHeight; if(!w||!h) return;
+  renderer.setSize(w,h,false); renderer.domElement.style.width=w+'px'; renderer.domElement.style.height=h+'px';
+  camera.aspect=w/h; camera.updateProjectionMatrix();
+}
+new ResizeObserver(resize).observe(host); resize();
+
+function fitView(){
+  if(!lastModel) return;
+  const m=lastModel, c=[0,1,2].map(k=>(m.min[k]+m.max[k])/2), d=m.size;
+  const dir=m.kind==='slab'?[0.7,-1.0,0.9]:m.kind==='wall'?[0.2,-1.3,0.3]:[0.5,-1.0,0.55];
+  const dist=d*1.5;
+  controls.target.set(c[0],c[1],c[2]);
+  camera.position.set(c[0]+dir[0]*dist,c[1]+dir[1]*dist,c[2]+dir[2]*dist);
+  camera.near=Math.max(0.02,d/500); camera.far=d*80; camera.updateProjectionMatrix(); controls.update();
+}
+
+function hueColor(t,c){ t=Math.min(1,Math.max(0,t)); c.setHSL((1-t)*0.667,0.92,0.52); return c; }
+function autoScaleFactor(model,res){ if(res.maxDisp<1e-12) return 1; return Math.min(20000,Math.max(0.1,0.06*model.size/res.maxDisp)); }
+
+function setLegend(meta,lo,hi,title){
+  $('lgTitle').textContent=title||meta.t; $('lgNote').textContent=meta.note;
+  const d=meta.d; $('lgMin').textContent=lo.toFixed(d); $('lgMid').textContent=((lo+hi)/2).toFixed(d); $('lgMax').textContent=hi.toFixed(d)+(meta.cap?'+':'');
+}
+
+function renderScene(model,res){
+  const N=model.nn, isLine=model.isLine;
+  const sc=(res.unstable||res.tooLarge)?0:(P.autoScale?autoScaleFactor(model,res):P.defScale);
+  const pos=new Float32Array(3*N), d3=[0,0,0];
+  for(let i=0;i<N;i++){ disp3(model,res.u,i,d3); for(let k=0;k<3;k++) pos[3*i+k]=model.nodes[i][k]+(TG.def?sc*d3[k]:0); }
+  renderedPos=pos;
+  if(memMesh){memMesh.visible=isLine;} if(nodeMesh){nodeMesh.visible=isLine;}
+  disposeSurface();
+  if(wire){scene.remove(wire);wire.geometry.dispose();wire.material.dispose();wire=null;}
+  if(isLine) renderLines(model,res,pos); else renderSurface(model,res,pos);
+  renderLoads(model,pos); renderSupports(model);
+  grid.visible=TG.grid; axes.visible=TG.grid; axes.scale.setScalar(model.size*0.08);
+  const lab=$('labels');
+  if(labelEls.length!==N){ lab.innerHTML=''; labelEls=[]; if(N<=400) for(let i=0;i<N;i++){ const d=document.createElement('div'); d.className='lbl'; d.textContent='N'+i; lab.appendChild(d); labelEls.push(d);} }
+  lab.style.display=TG.labels?'block':'none';
+}
+
+function renderLines(model,res,pos){
+  const els=model.els, M=els.length, N=model.nn;
+  if(!memMesh||memMesh.count!==M){
+    if(memMesh){scene.remove(memMesh);memMesh.material.dispose();memMesh.dispose();}
+    memMesh=new THREE.InstancedMesh(cylGeo,new THREE.MeshStandardMaterial({roughness:0.5,metalness:0.15}),M);
+    memMesh.frustumCulled=false; scene.add(memMesh);
+  }
+  if(!nodeMesh||nodeMesh.count!==N){
+    if(nodeMesh){scene.remove(nodeMesh);nodeMesh.material.dispose();nodeMesh.dispose();}
+    nodeMesh=new THREE.InstancedMesh(sphGeo,new THREE.MeshStandardMaterial({color:0xcfd8e6,roughness:0.4,metalness:0.3}),N);
+    nodeMesh.frustumCulled=false; scene.add(nodeMesh);
+  }
+  memMesh.visible=true; nodeMesh.visible=true;
+  const mode=COLOR_MODES[model.kind].some(o=>o[0]===P.colorMode)?P.colorMode:COLOR_MODES[model.kind][0][0];
+  const meta=META[mode], vals=res.lineVals[mode];
+  let mxA=1e-12; vals.forEach(v=>{ if(Math.abs(v)>mxA) mxA=Math.abs(v); });
+  let lo,hi; if(meta.signed){lo=-mxA;hi=mxA;} else if(meta.cap){lo=0;hi=1;} else {lo=0;hi=mxA;}
+  setLegend(meta,lo,hi,model.kind==='truss'&&mode==='vm'?'Von Mises |σ| (MPa)':model.kind==='frame'&&mode==='vm'?'Peak combined stress |σ| (MPa)':model.kind==='frame'&&mode==='axial'?'Axial stress N/A (MPa)':null);
+  const m4=new THREE.Matrix4(),q=new THREE.Quaternion(),up=new THREE.Vector3(0,1,0);
+  const a=new THREE.Vector3(),b=new THREE.Vector3(),d=new THREE.Vector3(),mid=new THREE.Vector3(),s=new THREE.Vector3(),col=new THREE.Color();
+  const nodeR=new Float32Array(N);
+  els.forEach((el,e)=>{
+    const na=el.nodes[0], nb=el.nodes[1];
+    a.set(pos[3*na],pos[3*na+1],pos[3*na+2]); b.set(pos[3*nb],pos[3*nb+1],pos[3*nb+2]);
+    d.subVectors(b,a); const len=d.length()||1e-6; d.divideScalar(len); mid.addVectors(a,b).multiplyScalar(0.5);
+    q.setFromUnitVectors(up,d); s.set(el.rad,len,el.rad); m4.compose(mid,q,s); memMesh.setMatrixAt(e,m4);
+    nodeR[na]=Math.max(nodeR[na],el.rad); nodeR[nb]=Math.max(nodeR[nb],el.rad);
+    if(TG.stress) hueColor((vals[e]-lo)/((hi-lo)||1),col); else col.set(0x9fb0c6);
+    memMesh.setColorAt(e,col);
+  });
+  memMesh.instanceMatrix.needsUpdate=true; memMesh.instanceColor.needsUpdate=true; memMesh.computeBoundingSphere();
+  const nq=new THREE.Quaternion(), nv=new THREE.Vector3(), ns=new THREE.Vector3();
+  for(let i=0;i<N;i++){ const r=(nodeR[i]||0.02)*1.25; nv.set(pos[3*i],pos[3*i+1],pos[3*i+2]); ns.set(r,r,r); m4.compose(nv,nq,ns); nodeMesh.setMatrixAt(i,m4); }
+  nodeMesh.instanceMatrix.needsUpdate=true;
+  if(TG.orig){
+    const arr=new Float32Array(M*6);
+    els.forEach((el,e)=>{ const A=model.nodes[el.nodes[0]],B=model.nodes[el.nodes[1]]; arr.set([A[0],A[1],A[2],B[0],B[1],B[2]],e*6); });
+    const g=new THREE.BufferGeometry(); g.setAttribute('position',new THREE.BufferAttribute(arr,3));
+    wire=new THREE.LineSegments(g,new THREE.LineBasicMaterial({color:0xe2e8f0,transparent:true,opacity:0.35}));
+    wire.visible=TG.def; scene.add(wire);
+  }
+}
+
+function disposeSurface(){
+  if(!surf) return;
+  surf.group.children.forEach(c=>{ c.geometry&&c.geometry.dispose(); c.material&&c.material.dispose(); });
+  scene.remove(surf.group); surf=null;
+}
+function renderSurface(model,res,pos){
+  if(memMesh) memMesh.visible=false; if(nodeMesh) nodeMesh.visible=false;
+  const N=model.nn, els=model.els;
+  const mode=COLOR_MODES[model.kind].some(o=>o[0]===P.colorMode)?P.colorMode:COLOR_MODES[model.kind][0][0];
+  const meta=META[mode];
+  const vals=mode==='disp'?Array.from(res.dmag,v=>v*1000):res.nodeVals[mode];
+  let mxA=1e-12; for(let i=0;i<N;i++) if(Math.abs(vals[i])>mxA) mxA=Math.abs(vals[i]);
+  let lo,hi; if(meta.signed){lo=-mxA;hi=mxA;} else {lo=0;hi=mxA;}
+  let title=meta.t;
+  if(model.kind==='wall'){ title={vm:'Von Mises σ (MPa)',s1:'Normal stress σx (MPa)',s2:'Normal stress σz (MPa)',t12:'Shear stress τxz (MPa)',disp:'Displacement |u| (mm)'}[mode]; }
+  else { title={vm:'Von Mises σ, top fibre (MPa)',s1:'σx, top fibre (MPa)',s2:'σy, top fibre (MPa)',t12:'τxy, top fibre (MPa)',disp:'Deflection |w| (mm)'}[mode]; }
+  setLegend(meta,lo,hi,title);
+  const col=new THREE.Color(), colors=new Float32Array(N*3);
+  for(let i=0;i<N;i++){ if(TG.stress) hueColor((vals[i]-lo)/((hi-lo)||1),col); else col.set(0x9fb0c6); colors[3*i]=col.r; colors[3*i+1]=col.g; colors[3*i+2]=col.b; }
+  const idx=[], edgeSet=new Set(), edgeIdx=[];
+  els.forEach(el=>{
+    const [a,b,c,d]=el.nodes; idx.push(a,b,c,a,c,d);
+    [[a,b],[b,c],[c,d],[d,a]].forEach(([p,q])=>{ const k=p<q?p*N+q:q*N+p; if(!edgeSet.has(k)){edgeSet.add(k);edgeIdx.push(p,q);} });
+  });
+  const posAttr=new THREE.BufferAttribute(pos,3);
+  const g=new THREE.BufferGeometry(); g.setAttribute('position',posAttr); g.setAttribute('color',new THREE.BufferAttribute(colors,3)); g.setIndex(idx); g.computeVertexNormals();
+  const mesh=new THREE.Mesh(g,new THREE.MeshStandardMaterial({vertexColors:true,side:THREE.DoubleSide,roughness:0.6,metalness:0.05}));
+  const group=new THREE.Group(); group.add(mesh);
+  if(TG.mesh){
+    const eg=new THREE.BufferGeometry(); eg.setAttribute('position',posAttr); eg.setIndex(edgeIdx);
+    group.add(new THREE.LineSegments(eg,new THREE.LineBasicMaterial({color:0x0b0e14,transparent:true,opacity:0.45})));
+  }
+  if(TG.orig&&TG.def){
+    const op=new Float32Array(N*3); for(let i=0;i<N;i++) for(let k=0;k<3;k++) op[3*i+k]=model.nodes[i][k];
+    const og=new THREE.BufferGeometry(); og.setAttribute('position',new THREE.BufferAttribute(op,3)); og.setIndex(edgeIdx);
+    group.add(new THREE.LineSegments(og,new THREE.LineBasicMaterial({color:0xe2e8f0,transparent:true,opacity:0.3})));
+  }
+  scene.add(group); surf={group,mesh};
+}
+
+function renderLoads(model,pos){
+  while(loadGroup.children.length){ const c=loadGroup.children.pop(); c.dispose&&c.dispose(); }
+  if(!TG.loads) return;
+  const N=model.nn, dpn=model.dpn, F=model.F, f3=new Float64Array(3*N); let maxF=0;
+  for(let i=0;i<N;i++){ for(let k=0;k<dpn;k++){ const ax=model.axis[k]; if(ax>=0) f3[3*i+ax]+=F[i*dpn+k]; } maxF=Math.max(maxF,Math.hypot(f3[3*i],f3[3*i+1],f3[3*i+2])); }
+  if(maxF<=0) return;
+  const list=[]; for(let i=0;i<N;i++){ const m=Math.hypot(f3[3*i],f3[3*i+1],f3[3*i+2]); if(m>=0.04*maxF) list.push([i,m]); }
+  const stride=Math.max(1,Math.ceil(list.length/80)), base=Math.max(0.1*model.size,1);
+  for(let q=0;q<list.length;q+=stride){
+    const [i,m]=list[q], dir=new THREE.Vector3(f3[3*i]/m,f3[3*i+1]/m,f3[3*i+2]/m);
+    const len=Math.max(0.25*base,base*m/maxF), p=new THREE.Vector3(pos[3*i],pos[3*i+1],pos[3*i+2]).addScaledVector(dir,-len);
+    loadGroup.add(new THREE.ArrowHelper(dir,p,len,0xffb347,Math.min(len*0.35,base*0.25),Math.min(len*0.2,base*0.15)));
+  }
+}
+function renderSupports(model){
+  while(supGroup.children.length){ const c=supGroup.children.pop(); c.geometry&&c.geometry.dispose(); c.material&&c.material.dispose(); }
+  if(!TG.supports) return;
+  const sz=Math.max(0.02*model.size,0.12), stride=Math.max(1,Math.ceil(model.supports.length/60));
+  model.supports.forEach((sp,k)=>{
+    if(k%stride) return;
+    const n=model.nodes[sp.node]; let mesh;
+    if(sp.type==='fixed'){ mesh=new THREE.Mesh(new THREE.BoxGeometry(sz*1.6,sz*1.6,sz*0.8),new THREE.MeshStandardMaterial({color:0xf472b6})); mesh.position.set(n[0],n[1],n[2]-sz*0.4); }
+    else { mesh=new THREE.Mesh(new THREE.ConeGeometry(sz,sz*1.8,16),new THREE.MeshStandardMaterial({color:sp.type==='pin'?0x34d399:0x38bdf8})); mesh.rotation.x=Math.PI/2; mesh.position.set(n[0],n[1],n[2]-sz*0.9); }
+    supGroup.add(mesh);
+    if(sp.type==='roller'){ const rl=new THREE.Mesh(new THREE.SphereGeometry(sz*0.4,12,8),new THREE.MeshStandardMaterial({color:0x7dd3fc})); rl.position.set(n[0],n[1],n[2]-sz*2.1); supGroup.add(rl); }
+  });
+}
+
+const _v=new THREE.Vector3();
+function updateLabels(){
+  if(!TG.labels||!labelEls.length) return;
+  const w=host.clientWidth,h=host.clientHeight;
+  for(let i=0;i<labelEls.length;i++){
+    _v.set(renderedPos[3*i],renderedPos[3*i+1],renderedPos[3*i+2]).project(camera);
+    const el=labelEls[i]; if(_v.z>1||_v.z<-1){el.style.display='none';continue;}
+    el.style.display='block'; el.style.left=((_v.x*0.5+0.5)*w)+'px'; el.style.top=((-_v.y*0.5+0.5)*h)+'px';
+  }
+}
+(function animate(){ requestAnimationFrame(animate); controls.update(); updateLabels(); renderer.render(scene,camera); })();
+
+const ray=new THREE.Raycaster(), mouse=new THREE.Vector2(), hov=$('hover');
+renderer.domElement.addEventListener('pointermove',ev=>{
+  if(!lastRes||!lastModel||ev.buttons||lastRes.tooLarge){hov.classList.add('hidden');return;}
+  const rc=renderer.domElement.getBoundingClientRect();
+  mouse.set(((ev.clientX-rc.left)/rc.width)*2-1,-((ev.clientY-rc.top)/rc.height)*2+1);
+  ray.setFromCamera(mouse,camera);
+  let html=null;
+  if(lastModel.isLine&&memMesh){ const hit=ray.intersectObject(memMesh,false)[0]; if(hit&&hit.instanceId!==undefined) html=lastRes.lineHover(hit.instanceId); }
+  else if(surf){ const hit=ray.intersectObject(surf.mesh,false)[0]; if(hit&&hit.faceIndex!==undefined) html=lastRes.elHover(hit.faceIndex>>1); }
+  if(html){ hov.innerHTML=html; hov.style.left=(ev.clientX-rc.left+14)+'px'; hov.style.top=(ev.clientY-rc.top+14)+'px'; hov.classList.remove('hidden'); }
+  else hov.classList.add('hidden');
+});
+renderer.domElement.addEventListener('pointerleave',()=>hov.classList.add('hidden'));
+document.querySelectorAll('#toggles .pill').forEach(p=>{
+  p.onclick=()=>{ const k=p.dataset.k; TG[k]=!TG[k]; p.classList.toggle('on',TG[k]); if(lastModel) renderScene(lastModel,lastRes); };
+});
+
+/* =========================================================
+   RESULTS DASHBOARD
+   ========================================================= */
+for(let i=1;i<=4;i++) $('cards').appendChild(mk(`<div class="rounded-lg bg-white/[0.04] p-2"><div class="text-[10px] text-slate-400" id="cLab${i}">—</div><div class="text-lg font-semibold text-orange-300 tabular-nums"><span id="cVal${i}">0</span><span class="text-[11px] text-slate-400" id="cUnit${i}"></span></div><div id="cSub${i}" class="text-[10px] text-slate-500">—</div></div>`));
+const axName=['x','y','z'];
+function vecStr(v){ const p=[]; v.forEach((x,i)=>{ if(Math.abs(x)>1e-6) p.push(`F${axName[i]} ${x.toFixed(1)}`); }); return p.length?p.join(' · ')+' kN':'0 kN'; }
+function updateDashboard(model,res){
+  const set=(id,t)=>$(id).textContent=t, warn=$('rWarn');
+  if(res.tooLarge){ warn.classList.remove('hidden'); warn.textContent=`Model too large for the in-browser solver (${res.nf} free DOF). Reduce the mesh or the number of members.`; }
+  else if(res.unstable){ warn.classList.remove('hidden'); warn.textContent='Unstable structure / mechanism detected: the stiffness matrix is singular. Check the supports (e.g. both rollers, no restraint along X) or the configuration. Results are not valid.'; }
+  else if(res.maxDisp>model.size){ warn.classList.remove('hidden'); warn.textContent='Displacements are larger than the structure: outside the small-displacement assumption.'; }
+  else warn.classList.add('hidden');
+  res.cards.forEach((c,i)=>{ set('cLab'+(i+1),c.label); set('cVal'+(i+1),c.value); set('cUnit'+(i+1),c.unit); set('cSub'+(i+1),c.sub); });
+  const u=res.util, pct=u*100; set('rUtil',pct.toFixed(1)+'%');
+  const bar=$('rUtilBar'); bar.style.width=Math.min(100,pct)+'%';
+  const st=$('rStatus'); let cls,txt,colr;
+  if(res.tooLarge){txt='TOO LARGE';cls='bg-amber-500/20 text-amber-300';colr='#fbbf24';}
+  else if(res.unstable){txt='UNSTABLE';cls='bg-rose-500/20 text-rose-300';colr='#f43f5e';}
+  else if(u<0.8){txt='SAFE';cls='bg-emerald-500/20 text-emerald-300';colr='#34d399';}
+  else if(u<=1){txt='NEAR LIMIT';cls='bg-amber-500/20 text-amber-300';colr='#fbbf24';}
+  else {txt='OVERSTRESSED';cls='bg-rose-500/20 text-rose-300';colr='#f43f5e';}
+  bar.style.background=colr; st.textContent=txt; st.className='text-[10px] font-bold px-2 py-0.5 rounded-full '+cls;
+  set('rUtilSub',res.utilSub);
+  set('rFz',vecStr(res.sumF)); set('rRz',vecStr(res.sumR));
+  const err=Math.max(...[0,1,2].map(i=>Math.abs(res.sumR[i]+res.sumF[i])));
+  set('rEq',err<1e-6?'0.000 kN ✓':err.toFixed(3)+' kN'); set('rT',res.ms.toFixed(1)+' ms');
+  const kindName={truss:'bar',frame:'beam element',wall:'Q4 element',slab:'plate Q4 element'}[model.kind];
+  set('rMeta',`${model.nn} nodes · ${model.els.length} ${kindName}s · ${res.nf} free DOF · bw ${res.bw}`);
+}
+
+/* =========================================================
+   UPDATE LOOP & EXPORTS
+   ========================================================= */
+let pending=false;
+function requestUpdate(){ if(pending) return; pending=true; requestAnimationFrame(()=>{pending=false; update();}); }
+function update(){
+  const model=buildModel(P), res=solveAndPost(model,P);
+  lastModel=model; lastRes=res;
+  renderScene(model,res); updateDashboard(model,res);
+  if(needFit){ fitView(); needFit=false; }
+  if(P.autoScale&&!res.unstable&&!res.tooLarge) ctl.defScale.set(Math.min(2000,Math.max(1,Math.round(autoScaleFactor(model,res)))));
+}
+function download(name,text,type){ const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([text],{type})); a.download=name; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),1000); }
+
+$('bCsv').onclick=()=>{
+  if(!lastModel||lastRes.tooLarge) return; const m=lastModel,r=lastRes,d3=[0,0,0];
+  let s=`# STRUCTURE: ${m.kind}\n# NODES\nid,x_m,y_m,z_m,ux_mm,uy_mm,uz_mm\n`;
+  m.nodes.forEach((n,i)=>{ disp3(m,r.u,i,d3); s+=`${i},${n[0].toFixed(4)},${n[1].toFixed(4)},${n[2].toFixed(4)},${(d3[0]*1000).toFixed(5)},${(d3[1]*1000).toFixed(5)},${(d3[2]*1000).toFixed(5)}\n`; });
+  if(m.isLine){
+    s+='\n# ELEMENTS\nid,node_a,node_b,type,length_m,axial_stress_MPa,peak_stress_MPa,moment_kNm,utilization\n';
+    m.els.forEach((el,e)=>s+=`${e},${el.nodes[0]},${el.nodes[1]},${el.type},${el.L.toFixed(4)},${r.lineVals.axial[e].toFixed(3)},${r.lineVals.vm[e].toFixed(3)},${r.lineVals.moment[e].toFixed(3)},${r.lineVals.util[e].toFixed(4)}\n`);
+  } else {
+    s+='\n# NODAL STRESSES (smoothed, MPa)\nnode,von_mises,sigma_1,sigma_2,tau\n';
+    for(let i=0;i<m.nn;i++) s+=`${i},${r.nodeVals.vm[i].toFixed(4)},${r.nodeVals.s1[i].toFixed(4)},${r.nodeVals.s2[i].toFixed(4)},${r.nodeVals.t12[i].toFixed(4)}\n`;
+    s+='\n# ELEMENTS (quad connectivity)\nid,n1,n2,n3,n4\n';
+    m.els.forEach((el,e)=>s+=`${e},${el.nodes.join(',')}\n`);
+  }
+  download('parafea_results.csv',s,'text/csv');
+};
+$('bPy').onclick=()=>{
+  if(!lastModel||lastRes.tooLarge) return; const m=lastModel,r=lastRes;
+  let s='# ParaFEA export - run in Rhino (EditPythonScript)\nimport rhinoscriptsyntax as rs\nimport System.Drawing\n\nnodes = [\n';
+  m.nodes.forEach(n=>s+=`    (${n[0].toFixed(4)}, ${n[1].toFixed(4)}, ${n[2].toFixed(4)}),\n`);
+  s+=']\n';
+  if(m.isLine){
+    s+='# (node_a, node_b, type, axial_stress_MPa, peak_stress_MPa, moment_kNm, utilization)\nmembers = [\n';
+    m.els.forEach((el,e)=>s+=`    (${el.nodes[0]}, ${el.nodes[1]}, "${el.type}", ${r.lineVals.axial[e].toFixed(3)}, ${r.lineVals.vm[e].toFixed(3)}, ${r.lineVals.moment[e].toFixed(3)}, ${r.lineVals.util[e].toFixed(4)}),\n`);
+    s+=`]\n\nfor a, b, t, sa, sv, mo, ut in members:\n    g = rs.AddLine(nodes[a], nodes[b])\n    rs.SetUserText(g, "type", t)\n    rs.SetUserText(g, "axial_stress_MPa", str(sa))\n    rs.SetUserText(g, "peak_stress_MPa", str(sv))\n    rs.SetUserText(g, "moment_kNm", str(mo))\n    rs.SetUserText(g, "utilization", str(ut))\n    h = max(0.0, min(1.0, ut))\n    rs.ObjectColor(g, (int(255*h), int(255*(1-abs(2*h-1))), int(255*(1-h))))\n`;
+  } else {
+    const vals=r.nodeVals.vm; let mxv=1e-12; for(let i=0;i<m.nn;i++) mxv=Math.max(mxv,vals[i]);
+    s+='faces = [\n'; m.els.forEach(el=>s+=`    (${el.nodes.join(', ')}),\n`); s+=']\nvm = [\n';
+    for(let i=0;i<m.nn;i++) s+=`    ${vals[i].toFixed(4)},\n`;
+    s+=`]\nvmax = ${mxv.toFixed(4)}\n\ncolors = []\nfor v in vm:\n    t = max(0.0, min(1.0, v / vmax))\n    colors.append(System.Drawing.Color.FromArgb(int(255*t), int(255*(1-abs(2*t-1))), int(255*(1-t))))\nmesh = rs.AddMesh(nodes, faces, vertex_colors=colors)\n`;
+  }
+  download('parafea_model.py',s,'text/x-python');
+};
+$('bFit').onclick=fitView;
+$('bReset').onclick=()=>{ P={...DEFAULTS,struct:P.struct,...PRESETS[P.struct]}; syncUI(); needFit=true; requestUpdate(); };
+
+syncUI();
+update();
+</script>
+</body>
+</html>
