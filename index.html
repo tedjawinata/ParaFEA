@@ -14,27 +14,28 @@
 } }
 </script>
 <style>
-  html,body{height:100%;margin:0;background:#0b0e14;font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif;color:#e2e8f0}
-  .glass{background:rgba(18,22,32,.74);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.08)}
-  #viewport{background:radial-gradient(ellipse at 50% 35%,#1c2333 0%,#0d1119 60%,#080a0f 100%)}
-  input[type=range]{-webkit-appearance:none;appearance:none;height:4px;background:#2a3142;border-radius:4px;width:100%;outline:none}
-  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:#ff9f2e;border:2px solid #0b0e14;box-shadow:0 0 0 1px #ff9f2e;cursor:pointer}
-  input[type=range]::-moz-range-thumb{width:12px;height:12px;border-radius:50%;background:#ff9f2e;border:2px solid #0b0e14;cursor:pointer}
+  html,body{height:100%;margin:0;background:#000000;font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif;color:#e2e8f0}
+  .glass{background:rgba(0,0,0,.8);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.08)}
+  #viewport{background:radial-gradient(ellipse at 50% 35%,#0a140e 0%,#030604 60%,#000000 100%)}
+  input[type=range]{-webkit-appearance:none;appearance:none;height:4px;background:#26302a;border-radius:4px;width:100%;outline:none}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:#22e06b;border:2px solid #000000;box-shadow:0 0 0 1px #22e06b;cursor:pointer}
+  input[type=range]::-moz-range-thumb{width:12px;height:12px;border-radius:50%;background:#22e06b;border:2px solid #000000;cursor:pointer}
   input[type=range]:disabled{opacity:.35}
-  .num{width:64px;background:#0d1119;border:1px solid #2a3142;border-radius:4px;color:#fbbf6a;font-size:11px;padding:2px 4px;text-align:right;font-variant-numeric:tabular-nums}
-  .num:focus,.sel:focus{outline:1px solid #ff9f2e}
-  .sel{width:100%;background:#0d1119;border:1px solid #2a3142;border-radius:4px;color:#e2e8f0;font-size:11px;padding:4px 6px}
-  .port{width:8px;height:8px;border-radius:50%;background:#0d1119;border:2px solid #ff9f2e;display:inline-block}
+  .num{width:64px;background:#000000;border:1px solid #26302a;border-radius:4px;color:#6ff0a0;font-size:11px;padding:2px 4px;text-align:right;font-variant-numeric:tabular-nums}
+  .num:focus,.sel:focus{outline:1px solid #22e06b}
+  .sel{width:100%;background:#000000;border:1px solid #26302a;border-radius:4px;color:#e2e8f0;font-size:11px;padding:4px 6px}
+  .port{width:8px;height:8px;border-radius:50%;background:#000000;border:2px solid #22e06b;display:inline-block}
   .port.out{border-color:#34d399}
   .tip{position:relative;cursor:help;display:inline-flex;align-items:center;justify-content:center;width:13px;height:13px;border-radius:50%;border:1px solid #475569;color:#94a3b8;font-size:9px;flex:none}
-  .tip:hover::after{content:attr(data-tip);position:absolute;left:0;top:17px;z-index:60;width:210px;padding:6px 8px;background:#05070b;border:1px solid #2a3142;border-radius:6px;font-size:11px;color:#cbd5e1;line-height:1.35;white-space:normal;font-weight:400;text-transform:none;letter-spacing:0}
+  .tip:hover::after{content:attr(data-tip);position:absolute;left:0;top:17px;z-index:60;width:210px;padding:6px 8px;background:#000000;border:1px solid #26302a;border-radius:6px;font-size:11px;color:#cbd5e1;line-height:1.35;white-space:normal;font-weight:400;text-transform:none;letter-spacing:0}
   .pill{font-size:11px;padding:4px 10px;border-radius:999px;border:1px solid rgba(255,255,255,.12);color:#94a3b8;cursor:pointer;user-select:none;transition:.15s}
   .pill:hover{color:#e2e8f0}
-  .pill.on{background:rgba(255,159,46,.16);border-color:#ff9f2e;color:#ffc27a}
-  .btn{font-size:11px;padding:6px 8px;border-radius:6px;background:#1b2130;border:1px solid #2a3142;color:#cbd5e1;cursor:pointer;flex:1}
-  .btn:hover{border-color:#ff9f2e;color:#fff}
+  .pill.on{background:rgba(34,224,107,.16);border-color:#22e06b;color:#9bf7bd}
+  .btn{font-size:11px;padding:6px 8px;border-radius:6px;background:#0c110e;border:1px solid #26302a;color:#cbd5e1;cursor:pointer;flex:1}
+  .btn:hover{border-color:#22e06b;color:#fff}
   .lbl{position:absolute;font-size:10px;color:#67e8f9;transform:translate(-50%,-130%);pointer-events:none;text-shadow:0 0 3px #000;white-space:nowrap}
-  ::-webkit-scrollbar{width:8px}::-webkit-scrollbar-thumb{background:#2a3142;border-radius:4px}
+    .blb{position:absolute;font-size:10px;color:#6ff0a0;background:rgba(0,0,0,.82);padding:0 4px;border-radius:3px;transform:translate(-50%,-50%);pointer-events:none;white-space:nowrap;font-variant-numeric:tabular-nums}
+  ::-webkit-scrollbar{width:8px}::-webkit-scrollbar-thumb{background:#26302a;border-radius:4px}
 </style>
 </head>
 <body class="overflow-hidden">
@@ -44,11 +45,11 @@
   <aside class="glass w-full md:w-[350px] md:min-w-[350px] h-[46%] md:h-full flex flex-col z-20 order-2 md:order-1">
     <div class="px-4 py-3 border-b border-white/10">
       <div class="flex items-center gap-2">
-        <div class="w-7 h-7 rounded-md bg-gradient-to-br from-orange-400 to-rose-500 flex items-center justify-center text-[13px] font-bold text-black">FE</div>
+        <div class="w-7 h-7 rounded-md bg-gradient-to-br from-green-400 to-emerald-600 flex items-center justify-center text-[13px] font-bold text-black">FE</div>
         <div>
-          <div class="text-sm font-semibold tracking-wide">ParaFEA <span class="text-orange-400">Structural</span></div>
+          <div class="text-sm font-semibold tracking-wide">ParaFEA <span class="text-green-400">Structural</span></div>
           <div class="text-[10px] text-slate-400">Truss · Frame · Wall · Slab — linear static FEA · Rhino / Grasshopper workflow</div>
-          <div class="text-[10px] text-orange-300/80 mt-0.5">Developed by G.K. Tedjawinata</div>
+          <div class="text-[10px] text-green-300/80 mt-0.5">Developed by G.K. Tedjawinata</div>
         </div>
       </div>
     </div>
@@ -58,6 +59,7 @@
       <button class="btn" id="bFit" title="Fit camera to structure">Fit view</button>
       <button class="btn" id="bCsv" title="Download nodes, elements and results as CSV">CSV</button>
       <button class="btn" id="bPy" title="Download a RhinoPython script (lines or mesh) with results">RhinoPy</button>
+      <button class="btn" id="bPng" title="Save the current viewport as a PNG image (turn on Moment diagram first for a BMD picture)">PNG</button>
     </div>
   </aside>
 
@@ -65,6 +67,7 @@
   <main class="relative flex-1 order-1 md:order-2 min-h-0" id="viewport">
     <div id="canvasHost" class="absolute inset-0"></div>
     <div id="labels" class="absolute inset-0 pointer-events-none overflow-hidden"></div>
+    <div id="bmdLab" class="absolute inset-0 pointer-events-none overflow-hidden"></div>
 
     <div class="absolute top-3 left-3 right-3 md:right-[330px] flex flex-wrap gap-1.5 z-10" id="toggles">
       <span class="pill on" data-k="orig">Original wireframe</span>
@@ -75,6 +78,7 @@
       <span class="pill on" data-k="loads">Load vectors</span>
       <span class="pill on" data-k="supports">Supports</span>
       <span class="pill on" data-k="grid">Grid</span>
+      <span class="pill" data-k="bmd" id="pillBmd" title="Bending moment diagram, drawn on the tension side (hides the deformed shape)">Moment diagram</span>
     </div>
 
     <div class="glass absolute top-3 right-3 w-[310px] max-h-[calc(100%-24px)] overflow-y-auto rounded-xl z-10 hidden md:block" id="resultsCard">
@@ -86,7 +90,7 @@
       <div class="p-3 grid grid-cols-2 gap-2" id="cards"></div>
       <div class="px-3 pb-3">
         <div class="flex justify-between text-[10px] text-slate-400 mb-1"><span>Structural efficiency (utilization)</span><span id="rUtil" class="text-slate-200 font-semibold tabular-nums">0%</span></div>
-        <div class="h-2 rounded-full bg-[#2a3142] overflow-hidden"><div id="rUtilBar" class="h-full rounded-full" style="width:0%"></div></div>
+        <div class="h-2 rounded-full bg-[#26302a] overflow-hidden"><div id="rUtilBar" class="h-full rounded-full" style="width:0%"></div></div>
         <div id="rUtilSub" class="text-[10px] text-slate-500 mt-1">—</div>
       </div>
       <div class="px-3 pb-3 text-[10px] text-slate-400 grid grid-cols-1 gap-y-0.5 border-t border-white/10 pt-2">
@@ -137,16 +141,22 @@ const DEFAULTS = {
   wallSup:'twopoints', supLen:1,
   // slab
   slabLx:6, slabLy:6, slabT:20, msx:16, msy:16, eL:'ss', eR:'ss', eF:'ss', eB:'ss', qload:10,
+  // custom modelling
+  cType:'truss', cDim:'2d', cPlane:'XZ', cOff:0, cSnap:0.5,
+  // custom plane
+  pType:'wall', pCell:0.5, pT:25,
   // common
   mat:'steel', E:210, fy:355, rho:7850, nu:0.30,
   Pload:50, wload:10, Hload:0, selfWeight:true,
-  colorMode:'axial', autoScale:true, defScale:50
+  colorMode:'axial', autoScale:true, defScale:50, bmdScale:100
 };
 const PRESETS = {
   truss:{ mat:'steel',    E:210, fy:355, rho:7850, nu:0.30, Pload:50, wload:10,  Hload:0,  colorMode:'axial' },
   frame:{ mat:'concrete', E:30,  fy:30,  rho:2400, nu:0.20, Pload:0,  wload:25,  Hload:30, colorMode:'vm' },
   wall: { mat:'concrete', E:30,  fy:30,  rho:2400, nu:0.20, Pload:0,  wload:120, Hload:0,  colorMode:'vm' },
-  slab: { mat:'concrete', E:30,  fy:30,  rho:2400, nu:0.20, Pload:0,  wload:0,   Hload:0,  colorMode:'vm' }
+  slab: { mat:'concrete', E:30,  fy:30,  rho:2400, nu:0.20, Pload:0,  wload:0,   Hload:0,  colorMode:'vm' },
+  custom:{ mat:'steel', E:210, fy:355, rho:7850, nu:0.30, Pload:0, wload:0, Hload:0, colorMode:'axial' },
+  cplane:{ mat:'concrete', E:30, fy:30, rho:2400, nu:0.20, Pload:0, wload:0, Hload:0, colorMode:'vm' }
 };
 const MAXDOF = 5000, GACC = 9.81;
 const fx = (v,d=2)=>Number(v).toFixed(d);
@@ -423,7 +433,7 @@ function postTruss(model,P,u){
       return `<b>M${e}</b> · ${el.type} (N${el.nodes[0]}–N${el.nodes[1]})<br>L = ${fx(el.L)} m<br>N = <b>${fx(Nn,1)} kN</b> ${Math.abs(Nn)<1e-6?'':Nn>0?'(tension)':'(compression)'}<br>σ = ${fx(lv.axial[e],1)} MPa<br>Util = ${fx(lv.util[e]*100,0)}% (${utype[e]})`; },
     peak:{maxN,maxNi,maxSig},
     _cards:(model,dm,weight)=>[
-      {label:'Max displacement',value:fx(dm.maxDisp*1000,dm.maxDisp*1000<10?2:1),unit:' mm',sub:dm.maxDisp>1e-9?`at N${dm.maxDispNode} · span/δ = ${fx(P.L/dm.maxDisp,0)}`:'no displacement'},
+      {label:'Max displacement',value:fx(dm.maxDisp*1000,dm.maxDisp*1000<10?2:1),unit:' mm',sub:dm.maxDisp>1e-9?`at N${dm.maxDispNode} · span/δ = ${fx((model.custom?model.size:P.L)/dm.maxDisp,0)}`:'no displacement'},
       {label:'Peak axial force',value:fx(Math.abs(maxN),1),unit:' kN',sub:`M${maxNi} (${model.els[maxNi].type}) · ${Math.abs(maxN)<1e-6?'—':maxN>0?'tension':'compression'}`},
       {label:'Peak von Mises σ',value:fx(maxSig,1),unit:' MPa',sub:'uniaxial: σvm = |σ|'},
       {label:'Self weight',value:fx(weight,0),unit:' kg',sub:`${fx(weight/P.L,1)} kg/m of span`}
@@ -507,7 +517,7 @@ function buildFrame(P){
   return {kind:'frame',nn,dpn:6,axis:[0,1,2,-1,-1,-1],nodes,els,fixed,F,supports,weight,beamMode,planar};
 }
 function postFrame(model,P,u){
-  const lv={axial:[],vm:[],moment:[],util:[]}, info=[];
+  const lv={axial:[],vm:[],moment:[],util:[]}, info=[], bmd=[]; let bmdMax=0; const NSB=8;
   let maxM=0,maxMe=0,maxN=0,maxNe=0,maxV=0,maxUtil=0,maxUe=0;
   model.els.forEach((el,e)=>{
     const ug=new Float64Array(12), ul=new Float64Array(12), s=new Float64Array(12);
@@ -526,11 +536,19 @@ function postFrame(model,P,u){
     const M=Math.hypot(my,mz), ut=sig/P.fy;
     lv.axial.push(sN); lv.vm.push(sig); lv.moment.push(M); lv.util.push(ut);
     info.push({N,V,my,mz,M,sig,ut});
+    const myS=[], mzS=[];
+    for(let k=0;k<=NSB;k++){
+      const x=el.L*k/NSB;
+      const a=s[4]+x*s[2]+el.ql[2]*x*x/2, b=s[5]-x*s[1]-el.ql[1]*x*x/2;
+      myS.push(a); mzS.push(b);
+      if(Math.abs(a)>bmdMax) bmdMax=Math.abs(a); if(Math.abs(b)>bmdMax) bmdMax=Math.abs(b);
+    }
+    bmd.push({my:myS,mz:mzS});
     if(M>maxM){maxM=M;maxMe=e;} if(Math.abs(N)>Math.abs(maxN)){maxN=N;maxNe=e;}
     if(V>maxV) maxV=V; if(ut>maxUtil){maxUtil=ut;maxUe=e;}
   });
   return {
-    lineVals:lv, util:maxUtil,
+    lineVals:lv, util:maxUtil, bmd, bmdMax,
     utilSub:`Governing: E${maxUe} (${model.els[maxUe].type}) · σ = N/A + M/S · fy = ${P.fy} MPa · max V = ${fx(maxV,1)} kN`,
     lineHover:e=>{ const el=model.els[e], r=info[e];
       return `<b>E${e}</b> · ${el.type} (N${el.nodes[0]}–N${el.nodes[1]})<br>L = ${fx(el.L)} m · ${fx(el.sec.b*100,0)}×${fx(el.sec.h*100,0)} cm<br>N = <b>${fx(r.N,1)} kN</b> ${Math.abs(r.N)<1e-6?'':r.N>0?'(tension)':'(compression)'}<br>M<sub>y</sub> = ${fx(r.my,1)} · M<sub>z</sub> = ${fx(r.mz,1)} kN·m<br>V = ${fx(r.V,1)} kN<br>σ<sub>max</sub> = ${fx(r.sig,1)} MPa · Util = ${fx(r.ut*100,0)}%`; },
@@ -623,7 +641,7 @@ function postWall(model,P,u){
     utilSub:`Peak von Mises at element ${model.els.length?maxVe:'—'} (element-centre value) · fy = ${P.fy} MPa`,
     elHover:e=>`<b>Element ${e}</b><br>σx = ${fx(sx[e],2)} · σz = ${fx(sz[e],2)} MPa<br>τxz = ${fx(tau[e],2)} MPa<br>σvm = <b>${fx(vm[e],2)} MPa</b><br>σ1 = ${fx(p1[e],2)} · σ3 = ${fx(p3[e],2)} MPa`,
     _cards:(model,dm,weight)=>[
-      {label:'Max displacement',value:fx(dm.maxDisp*1000,dm.maxDisp*1000<10?3:1),unit:' mm',sub:dm.maxDisp>1e-9?`at N${dm.maxDispNode} · L/δ = ${fx(P.wallL/dm.maxDisp,0)}`:'no displacement'},
+      {label:'Max displacement',value:fx(dm.maxDisp*1000,dm.maxDisp*1000<10?3:1),unit:' mm',sub:dm.maxDisp>1e-9?`at N${dm.maxDispNode} · L/δ = ${fx((model.custom?model.size:P.wallL)/dm.maxDisp,0)}`:'no displacement'},
       {label:'Peak von Mises σ',value:fx(maxVm,2),unit:' MPa',sub:'plane stress, element centre'},
       {label:'Max tensile σ1',value:fx(Math.max(0,maxP1),2),unit:' MPa',sub:'principal stress'},
       {label:'Max compressive σ3',value:fx(Math.abs(Math.min(0,minP3)),2),unit:' MPa',sub:`weight ${fx(weight,0)} kg`}
@@ -699,7 +717,7 @@ function postSlab(model,P,u){
     utilSub:`Peak von Mises at element ${maxVe} (top fibre, element-centre) · fy = ${P.fy} MPa`,
     elHover:e=>`<b>Element ${e}</b><br>Mx = ${fx(Mx[e],2)} · My = ${fx(My[e],2)} · Mxy = ${fx(Mxy[e],2)} kN·m/m<br>σx = ${fx(sx[e],2)} · σy = ${fx(sy[e],2)} MPa<br>τxy = ${fx(tau[e],2)} MPa<br>σvm(top) = <b>${fx(vm[e],2)} MPa</b>`,
     _cards:(model,dm,weight)=>[
-      {label:'Max deflection',value:fx(dm.maxDisp*1000,dm.maxDisp*1000<10?3:1),unit:' mm',sub:dm.maxDisp>1e-9?`at N${dm.maxDispNode} · span/δ = ${fx(Math.min(P.slabLx,P.slabLy)/dm.maxDisp,0)}`:'no deflection'},
+      {label:'Max deflection',value:fx(dm.maxDisp*1000,dm.maxDisp*1000<10?3:1),unit:' mm',sub:dm.maxDisp>1e-9?`at N${dm.maxDispNode} · span/δ = ${fx((model.custom?model.size:Math.min(P.slabLx,P.slabLy))/dm.maxDisp,0)}`:'no deflection'},
       {label:'Peak von Mises σ',value:fx(maxVm,2),unit:' MPa',sub:'top fibre, element centre'},
       {label:'Peak moment max(|Mx|,|My|)',value:fx(maxMo,2),unit:' kN·m/m',sub:'per metre width'},
       {label:'Self weight',value:fx(weight,0),unit:' kg',sub:`${fx(weight/(P.slabLx*P.slabLy),0)} kg/m²`}
@@ -710,16 +728,149 @@ function postSlab(model,P,u){
 /* =========================================================
    DISPATCH
    ========================================================= */
+/* =========================================================
+   CUSTOM MODEL (user-drawn nodes + members, bar or beam elements)
+   Geometry comes from P.cm = {nodes:[[x,y,z]], mem:[{a,b}], sup:{id:type}, load:{id:[fx,fy,fz]}}
+   ========================================================= */
+function buildCustom(P){
+  const C=P.cm||{nodes:[],mem:[],sup:{},load:{}};
+  const beam=P.cType==='beam', planar=P.cDim==='2d', dpn=beam?6:3;
+  const nodes=C.nodes.map(p=>[p[0],planar?0:p[1],p[2]]);
+  const nBase=nodes.length, raw=[], div=beam?Math.max(1,P.div|0):1;
+  C.mem.forEach(m=>{
+    if(m.a===m.b||!nodes[m.a]||!nodes[m.b]) return;
+    const p1=nodes[m.a], p2=nodes[m.b];
+    if(Math.hypot(p2[0]-p1[0],p2[1]-p1[1],p2[2]-p1[2])<1e-9) return;
+    let prev=m.a;
+    for(let k=1;k<=div;k++){
+      let nx;
+      if(k===div) nx=m.b;
+      else { nodes.push([p1[0]+(p2[0]-p1[0])*k/div,p1[1]+(p2[1]-p1[1])*k/div,p1[2]+(p2[2]-p1[2])*k/div]); nx=nodes.length-1; }
+      raw.push({a:prev,b:nx}); prev=nx;
+    }
+  });
+  const nn=nodes.length, used=new Uint8Array(nn);
+  raw.forEach(r=>{ used[r.a]=1; used[r.b]=1; });
+  const fixed=new Uint8Array(nn*dpn), supports=[];
+  for(let i=0;i<nn;i++){
+    if(!used[i]){ for(let k=0;k<dpn;k++) fixed[i*dpn+k]=1; continue; }
+    if(planar){ if(beam){ fixed[i*6+1]=1; fixed[i*6+3]=1; fixed[i*6+5]=1; } else fixed[i*3+1]=1; }
+  }
+  for(const key in C.sup){
+    const id=+key, type=C.sup[key];
+    if(!(id<nBase)||!used[id]) continue;
+    let ds;
+    if(type==='roller') ds=[2]; else if(type==='fixed'&&beam) ds=[0,1,2,3,4,5]; else ds=[0,1,2];
+    ds.forEach(d=>fixed[id*dpn+d]=1);
+    supports.push({node:id,type:(type==='fixed'&&!beam)?'pin':type});
+  }
+  const F=new Float64Array(nn*dpn);
+  for(const key in C.load){
+    const id=+key; if(!(id<nBase)||!used[id]) continue;
+    const v=C.load[key]; for(let k=0;k<3;k++) F[id*dpn+k]+=(planar&&k===1)?0:v[k];
+  }
+  const E=P.E*1e6; let weight=0, els;
+  if(!beam){
+    const Am=P.A*1e-4, rad=0.035*Math.pow(P.A/30,0.25);
+    els=raw.map(r=>{
+      const a=nodes[r.a], b=nodes[r.b], dx_=b[0]-a[0], dy_=b[1]-a[1], dz_=b[2]-a[2], L=Math.hypot(dx_,dy_,dz_), c=[dx_/L,dy_/L,dz_/L];
+      const mass=P.rho*Am*L; weight+=mass;
+      let w=0; if(P.selfWeight) w+=mass*GACC/1000; if(P.wload>0) w+=P.wload*L;
+      F[3*r.a+2]-=w/2; F[3*r.b+2]-=w/2;
+      const k=E*Am/L, ke=new Float64Array(36);
+      for(let p=0;p<6;p++) for(let q=0;q<6;q++){ const sg=((p<3)===(q<3))?1:-1; ke[p*6+q]=sg*k*c[p%3]*c[q%3]; }
+      return {nodes:[r.a,r.b],ke,type:'member',L,c,rad};
+    });
+  } else {
+    const G=E/(2*(1+P.nu)), sec=sectionProps(P.bB,P.bH), rad=Math.max(0.02,0.42*Math.sqrt(sec.b*sec.h));
+    els=raw.map(r=>{
+      const a=nodes[r.a], b=nodes[r.b], dx_=b[0]-a[0], dy_=b[1]-a[1], dz_=b[2]-a[2], L=Math.hypot(dx_,dy_,dz_);
+      const R=localAxes([dx_/L,dy_/L,dz_/L]), mass=P.rho*sec.A*L; weight+=mass;
+      const q=[0,0,-P.wload-(P.selfWeight?mass*GACC/1000/L:0)];
+      const kl=beamKeLocal(E,G,sec.A,sec.Iy,sec.Iz,sec.J,L), T=makeT(R), ke=tkt(T,kl);
+      const ql=[0,1,2].map(i=>R[i][0]*q[0]+R[i][1]*q[1]+R[i][2]*q[2]);
+      const L2=L*L/12, h=L/2;
+      const fel=new Float64Array([ql[0]*h,ql[1]*h,ql[2]*h,0,-ql[2]*L2,ql[1]*L2, ql[0]*h,ql[1]*h,ql[2]*h,0,ql[2]*L2,-ql[1]*L2]);
+      for(let i=0;i<12;i++){ let s=0; for(let m=0;m<12;m++) s+=T[m*12+i]*fel[m]; const nd=i<6?r.a:r.b; F[6*nd+(i%6)]+=s; }
+      return {nodes:[r.a,r.b],ke,kl,T,fel,ql,L,sec,type:'member',rad};
+    });
+  }
+  return {kind:beam?'frame':'truss',nn,dpn,axis:beam?[0,1,2,-1,-1,-1]:[0,1,2],nodes,els,fixed,F,supports,weight,planar,custom:true,empty:raw.length===0};
+}
+
+/* =========================================================
+   CUSTOM PLANE (user-drawn region of square Q4 cells: wall = plane stress XZ, slab = plate bending XY)
+   P.pm = {cells:{"i,j":1}, sup:{"i,j":type}, load:{"i,j":[fx,fz]}, lines:[{a:[i,j],b:[i,j],q:[qx,qz]}]}
+   ========================================================= */
+function gcdI(a,b){ while(b){ const t=a%b; a=b; b=t; } return a; }
+function segNodes(a,b){
+  const dx=b[0]-a[0], dy=b[1]-a[1], g=gcdI(Math.abs(dx),Math.abs(dy));
+  if(g===0) return [[a[0],a[1]]];
+  const out=[]; for(let m=0;m<=g;m++) out.push([a[0]+dx/g*m,a[1]+dy/g*m]);
+  return out;
+}
+function buildCPlane(P){
+  const C=P.pm||{cells:{},sup:{},load:{},lines:[]};
+  const wall=P.pType==='wall', dpn=wall?2:3, h=P.pCell, t=P.pT/100;
+  const E=P.E*1e6, nu=P.nu, G=E/(2*(1+nu));
+  const c=E/(1-nu*nu), D0=E*t*t*t/(12*(1-nu*nu)), Gs=(5/6)*G*t;
+  const nodes=[], nid=new Map();
+  const getN=(i,j)=>{ const k=i+','+j; let id=nid.get(k); if(id===undefined){ id=nodes.length; nodes.push(wall?[i*h,0,j*h]:[i*h,j*h,0]); nid.set(k,id); } return id; };
+  const proto=wall?null:slabKe([[0,0],[h,0],[h,h],[0,h]],D0,nu,Gs);
+  const keys=Object.keys(C.cells).sort((p,q)=>{ const a=p.split(',').map(Number), b=q.split(',').map(Number); return a[0]-b[0]||a[1]-b[1]; });
+  const els=[]; let weight=0;
+  keys.forEach(k=>{
+    const [i,j]=k.split(',').map(Number);
+    const n=[getN(i,j),getN(i+1,j),getN(i+1,j+1),getN(i,j+1)];
+    const xy=n.map(q=>[nodes[q][0],wall?nodes[q][2]:nodes[q][1]]);
+    els.push(wall?{nodes:n,ke:wallKe(xy,c,nu,G,t),xy,area:h*h,c,nu,G}:{nodes:n,ke:proto,xy,area:h*h,D0,nu,t});
+    weight+=P.rho*t*h*h;
+  });
+  const nn=nodes.length, fixed=new Uint8Array(nn*dpn), supports=[];
+  for(const k in C.sup){
+    const id=nid.get(k); if(id===undefined) continue;
+    const ty=C.sup[k]; let ds, vis;
+    if(wall){ ds=ty==='fixed'?[0,1]:ty==='rollerZ'?[1]:[0]; vis=ty==='fixed'?'fixed':'roller'; }
+    else { ds=ty==='clamped'?[0,1,2]:[0]; vis=ty==='clamped'?'fixed':'pin'; }
+    ds.forEach(d=>fixed[id*dpn+d]=1); supports.push({node:id,type:vis});
+  }
+  const F=new Float64Array(nn*dpn);
+  const addF=(id,fx,fz)=>{ if(wall){ F[2*id]+=fx; F[2*id+1]+=fz; } else F[3*id]+=fz; };
+  for(const k in C.load){ const id=nid.get(k); if(id!==undefined) addF(id,C.load[k][0],C.load[k][1]); }
+  (C.lines||[]).forEach(L=>{
+    const dx=L.b[0]-L.a[0], dy=L.b[1]-L.a[1], g=gcdI(Math.abs(dx),Math.abs(dy));
+    if(g===0) return;
+    const sx=dx/g, sy=dy/g, d=h*Math.hypot(sx,sy);
+    for(let m=0;m<=g;m++){
+      const id=nid.get((L.a[0]+sx*m)+','+(L.a[1]+sy*m)); if(id===undefined) continue;
+      const w=(m===0||m===g)?d/2:d; addF(id,L.q[0]*w,L.q[1]*w);
+    }
+  });
+  els.forEach(el=>el.nodes.forEach(q=>{
+    if(wall){ if(P.selfWeight) F[2*q+1]-=P.rho*t*el.area*GACC/1000/4; }
+    else F[3*q]-=(P.qload+(P.selfWeight?P.rho*GACC*t/1000:0))*el.area/4;
+  }));
+  return {kind:wall?'wall':'slab',nn,dpn,axis:wall?[0,2]:[2,-1,-1],nodes,els,fixed,F,supports,weight,t,D0,nu,custom:true,plane:true,empty:els.length===0};
+}
+
 function buildModel(P){
   let m;
-  switch(P.struct){ case 'frame': m=buildFrame(P); break; case 'wall': m=buildWall(P); break; case 'slab': m=buildSlab(P); break; default: m=buildTruss(P); }
+  switch(P.struct){ case 'cplane': m=buildCPlane(P); break; case 'custom': m=buildCustom(P); break; case 'frame': m=buildFrame(P); break; case 'wall': m=buildWall(P); break; case 'slab': m=buildSlab(P); break; default: m=buildTruss(P); }
   const mn=[1e18,1e18,1e18], mxv=[-1e18,-1e18,-1e18];
   m.nodes.forEach(p=>{ for(let k=0;k<3;k++){ mn[k]=Math.min(mn[k],p[k]); mxv[k]=Math.max(mxv[k],p[k]); } });
+  if(!m.nodes.length){ mn[0]=mn[1]=mn[2]=0; mxv[0]=12; mxv[1]=(P.struct==='cplane'?P.pType==='wall':P.cDim==='2d')?0:12; mxv[2]=(P.struct==='cplane'&&P.pType==='slab')?0:8; }
   m.min=mn; m.max=mxv; m.size=Math.max(mxv[0]-mn[0],mxv[1]-mn[1],mxv[2]-mn[2],1e-6);
   m.isLine=(m.kind==='truss'||m.kind==='frame');
   return m;
 }
 function solveAndPost(model,P){
+  if(model.empty){
+    const z=new Float64Array(model.nn), ph={label:'—',value:'—',unit:'',sub:''};
+    return {u:new Float64Array(model.nn*model.dpn),unstable:false,tooLarge:false,ms:0,nf:0,bw:0,sumF:[0,0,0],sumR:[0,0,0],dmag:z,maxDisp:0,maxDispNode:0,weight:0,util:0,
+      utilSub:'Empty model: add nodes and members with the modelling tools',
+      cards:[{label:'Nodes',value:String(model.nn),unit:'',sub:'placed'},{label:'Members',value:'0',unit:'',sub:'connect two nodes'},ph,ph],
+      lineVals:{axial:[],vm:[],moment:[],util:[]},lineHover:()=>'',nodeVals:{vm:z,s1:z,s2:z,t12:z},elHover:()=>''};
+  }
   const sol=femSolve(model);
   const nn=model.nn;
   let u=sol.u;
@@ -736,6 +887,7 @@ function solveAndPost(model,P){
   const res={u,unstable:sol.unstable,tooLarge:sol.tooLarge,ms:sol.ms,nf:sol.nf,bw:sol.bw,sumF:sol.sumF,sumR:sol.sumR,dmag,maxDisp,maxDispNode,weight:model.weight};
   if(post){ Object.assign(res,post); res.cards=post._cards(model,{maxDisp,maxDispNode},model.weight); }
   else { res.util=0; res.utilSub='—'; res.cards=[0,1,2,3].map(()=>({label:'—',value:'—',unit:'',sub:''})); }
+  if(res.unstable) res.bmd=null;
   if(res.unstable&&model.isLine){ const z=model.els.map(()=>0); res.lineVals={axial:z,vm:z,moment:z,util:z}; res.lineHover=()=>'unstable'; }
   if(res.unstable&&!model.isLine){ const z=new Float64Array(nn); res.nodeVals={vm:z,s1:z,s2:z,t12:z}; res.elHover=()=>'unstable'; }
   return res;
@@ -748,6 +900,7 @@ function solveAndPost(model,P){
 const $ = id => document.getElementById(id);
 let P = { ...DEFAULTS };
 const isT=p=>p.struct==='truss', isF=p=>p.struct==='frame', isW=p=>p.struct==='wall', isS=p=>p.struct==='slab';
+const isP=p=>p.struct==='cplane', isC=p=>p.struct==='custom', cT=p=>p.struct==='custom'&&p.cType==='truss', cBm=p=>p.struct==='custom'&&p.cType==='beam';
 const isBeam=p=>p.struct==='frame'&&p.frameType==='beam', isBldg=p=>p.struct==='frame'&&p.frameType==='frame';
 
 const COLOR_MODES = {
@@ -756,6 +909,7 @@ const COLOR_MODES = {
   wall: [['vm','Von Mises σ'],['s1','σx (horizontal)'],['s2','σz (vertical)'],['t12','τxz (shear)'],['disp','Displacement |u|']],
   slab: [['vm','Von Mises σ (top fibre)'],['s1','σx (top fibre)'],['s2','σy (top fibre)'],['t12','τxy (top fibre)'],['disp','Deflection |w|']]
 };
+const cModes=()=>P.struct==='custom'?COLOR_MODES[P.cType==='truss'?'truss':'frame']:P.struct==='cplane'?COLOR_MODES[P.pType]:COLOR_MODES[P.struct];
 const META = {
   axial:{t:'Axial stress (MPa)',signed:true,note:'blue = compression · red = tension',d:1},
   vm:{t:'Von Mises / peak stress (MPa)',signed:false,note:'blue = low · red = high',d:2},
@@ -769,7 +923,19 @@ const META = {
 
 const UI = [
  { title:'Structure', items:[
-   {type:'select',id:'struct',label:'Structure type',opts:[['truss','Truss (space / planar)'],['frame','Line: beam & frame'],['wall','Plane: wall / deep beam'],['slab','Plane: slab / plate']],tip:'Truss: pin-jointed bars. Line: beam elements with bending (continuous beam or multi-story frame). Plane: wall (plane stress) or slab (plate bending) shell mesh.'}
+   {type:'select',id:'struct',label:'Structure type',opts:[['truss','Truss (space / planar)'],['frame','Line: beam & frame'],['wall','Plane: wall / deep beam'],['slab','Plane: slab / plate'],['custom','Custom: draw your own model'],['cplane','Custom plane: draw wall / slab']],tip:'Truss: pin-jointed bars. Line: beam elements with bending (continuous beam or multi-story frame). Plane: wall (plane stress) or slab (plate bending) shell mesh. Custom: draw nodes and members yourself in the viewport.'}
+ ]},
+ { title:'Modelling · Custom', items:[
+   {type:'select',id:'cType',label:'Element type',show:isC,opts:[['truss','Truss bar (axial only)'],['beam','Beam / frame (bending)']],tip:'Truss: pin-jointed bars, 3 DOF per node. Beam: rigid-jointed Euler-Bernoulli beams, 6 DOF per node.'},
+   {type:'select',id:'cDim',label:'Model space',show:isC,opts:[['2d','2D · XZ plane'],['3d','3D · space']],tip:'2D keeps all nodes in the XZ plane (y = 0). 3D lets you draw on any work plane.'},
+   {type:'select',id:'cPlane',label:'Work plane',show:p=>isC(p)&&p.cDim==='3d',opts:[['XZ','XZ · elevation (y = offset)'],['XY','XY · plan (z = offset)'],['YZ','YZ · side (x = offset)']],tip:'Plane on which clicks place new nodes.'},
+   {type:'slider',id:'cOff',label:'Plane offset',unit:'m',min:-20,max:60,step:0.5,show:p=>isC(p)&&p.cDim==='3d',tip:'Position of the work plane along its normal axis.'},
+   {type:'slider',id:'cSnap',label:'Grid snap',unit:'m',min:0.1,max:5,step:0.1,show:isC,tip:'New nodes snap to this grid spacing.'}
+ ]},
+ { title:'Modelling · Custom plane', items:[
+   {type:'select',id:'pType',label:'Plane type',show:isP,opts:[['wall','Wall / deep beam (plane stress, XZ)'],['slab','Slab / plate (bending, XY)']],tip:'Wall: in-plane loads, drawn in the XZ plane. Slab: out-of-plane bending, drawn in the XY plane. Supports are cleared when the type changes.'},
+   {type:'slider',id:'pCell',label:'Grid / element size',unit:'m',min:0.1,max:2,step:0.05,show:isP,tip:'One square Q4 element and one drawing-grid cell. Changing it rescales the drawn model.'},
+   {type:'slider',id:'pT',label:'Thickness',unit:'cm',min:5,max:100,step:1,show:isP}
  ]},
  { title:'Geometry · Truss', items:[
    {type:'select',id:'topo',label:'Truss type',show:isT,opts:[['pratt','Pratt'],['howe','Howe'],['warren','Warren']],tip:'Web topology.'},
@@ -790,7 +956,7 @@ const UI = [
    {type:'toggle',id:'frame3D',label:'3D space frame',show:isBldg,tip:'ON: adds bays in Y with beams in both directions. OFF: planar frame in the XZ plane.'},
    {type:'slider',id:'baysY',label:'Bays in Y',unit:'',min:1,max:3,step:1,show:p=>isBldg(p)&&p.frame3D},
    {type:'slider',id:'bayD',label:'Bay depth (Y)',unit:'m',min:2,max:10,step:0.5,show:p=>isBldg(p)&&p.frame3D},
-   {type:'slider',id:'div',label:'Elements per member',unit:'',min:1,max:4,step:1,show:isF,tip:'Mesh refinement along each member. More elements give smoother moment colours and deformed shape.'}
+   {type:'slider',id:'div',label:'Elements per member',unit:'',min:1,max:4,step:1,show:p=>isF(p)||cBm(p),tip:'Mesh refinement along each member. More elements give smoother moment colours and deformed shape.'}
  ]},
  { title:'Geometry · Wall', items:[
    {type:'slider',id:'wallL',label:'Length (X)',unit:'m',min:2,max:30,step:0.5,show:isW},
@@ -813,16 +979,16 @@ const UI = [
  ]},
  { title:'Material & Section', items:[
    {type:'select',id:'mat',label:'Material preset',opts:[['steel','Steel S355'],['aluminum','Aluminum 6061-T6'],['timber','Timber GL24h'],['concrete','Concrete C30'],['custom','Custom']],tip:'Presets set E, strength, density and Poisson ratio. Editing any of them switches to Custom.'},
-   {type:'slider',id:'A',label:'Bar area A',unit:'cm²',min:1,max:300,step:1,show:isT,tip:'Same area for all bars. Euler check assumes a hollow tube with D/t = 20.'},
-   {type:'slider',id:'bB',label:'Beam width b',unit:'cm',min:10,max:80,step:1,show:isF,tip:'Rectangular beam section, width b.'},
-   {type:'slider',id:'bH',label:'Beam depth h',unit:'cm',min:10,max:120,step:1,show:isF,tip:'Rectangular beam section, depth h (strong axis bending).'},
+   {type:'slider',id:'A',label:'Bar area A',unit:'cm²',min:1,max:300,step:1,show:p=>isT(p)||cT(p),tip:'Same area for all bars. Euler check assumes a hollow tube with D/t = 20.'},
+   {type:'slider',id:'bB',label:'Beam width b',unit:'cm',min:10,max:80,step:1,show:p=>isF(p)||cBm(p),tip:'Rectangular beam section, width b.'},
+   {type:'slider',id:'bH',label:'Beam depth h',unit:'cm',min:10,max:120,step:1,show:p=>isF(p)||cBm(p),tip:'Rectangular beam section, depth h (strong axis bending).'},
    {type:'slider',id:'cB',label:'Column width b',unit:'cm',min:10,max:100,step:1,show:isBldg},
    {type:'slider',id:'cH',label:'Column depth h',unit:'cm',min:10,max:100,step:1,show:isBldg},
    {type:'slider',id:'E',label:"Young's modulus E",unit:'GPa',min:5,max:250,step:1},
-   {type:'slider',id:'nu',label:"Poisson's ratio ν",unit:'',min:0,max:0.45,step:0.01,show:p=>!isT(p)},
+   {type:'slider',id:'nu',label:"Poisson's ratio ν",unit:'',min:0,max:0.45,step:0.01,show:p=>!isT(p)&&!cT(p)},
    {type:'slider',id:'fy',label:'Strength fy',unit:'MPa',min:10,max:600,step:5,tip:'Yield / characteristic strength for the utilization ratio (uniform elastic check, no cracking).'},
    {type:'slider',id:'rho',label:'Density ρ',unit:'kg/m³',min:300,max:8000,step:50},
-   {type:'toggle',id:'buckling',label:'Euler buckling check',show:isT,tip:'Compression bars are also checked against Pcr = π²EI/L².'}
+   {type:'toggle',id:'buckling',label:'Euler buckling check',show:p=>isT(p)||cT(p),tip:'Compression bars are also checked against Pcr = π²EI/L².'}
  ]},
  { title:'Supports & Loads', items:[
    {type:'select',id:'supL',label:'Left support (x = 0)',show:isT,opts:[['pin','Pin'],['roller','Roller'],['fixed','Fixed']]},
@@ -838,16 +1004,17 @@ const UI = [
    {type:'select',id:'eB',label:'Edge y = Ly',show:isS,opts:[['ss','Simply supported'],['clamped','Clamped'],['free','Free']]},
    {type:'select',id:'loadMode',label:'Load case',show:isT,opts:[['both','Point + UDL'],['point','Point load only'],['udl','UDL only']]},
    {type:'select',id:'loadPos',label:'Load on chord',show:isT,opts:[['top','Top chord'],['bottom','Bottom chord']]},
-   {type:'slider',id:'Pload',label:p=>isT(p)?'Point load (midspan)':isBeam(p)?'Point load per span':isW(p)?'Point load (top, midspan)':'Point load (centre)',unit:'kN',min:0,max:1000,step:5,show:p=>!isBldg(p),tip:'Gravity point load. Beam: applied at the middle of each span.'},
-   {type:'slider',id:'wload',label:p=>isT(p)?'UDL intensity':isF(p)?'UDL on beams':'Line load on top edge',unit:'kN/m',min:0,max:300,step:1,show:p=>!isS(p),tip:'Gravity line load. Truss: lumped to chord nodes. Frame: on all beams. Wall: along the top edge.'},
-   {type:'slider',id:'qload',label:'Surface pressure q',unit:'kN/m²',min:0,max:50,step:0.5,show:isS,tip:'Uniform gravity pressure on the slab.'},
+   {type:'slider',id:'Pload',label:p=>isT(p)?'Point load (midspan)':isBeam(p)?'Point load per span':isW(p)?'Point load (top, midspan)':'Point load (centre)',unit:'kN',min:0,max:1000,step:5,show:p=>!isBldg(p)&&!isC(p)&&!isP(p),tip:'Gravity point load. Beam: applied at the middle of each span.'},
+   {type:'slider',id:'wload',label:p=>isC(p)?'UDL on all members':isT(p)?'UDL intensity':isF(p)?'UDL on beams':'Line load on top edge',unit:'kN/m',min:0,max:300,step:1,show:p=>!isS(p)&&!isP(p),tip:'Gravity line load. Truss: lumped to chord nodes. Frame: on all beams. Wall: along the top edge.'},
+   {type:'slider',id:'qload',label:'Surface pressure q',unit:'kN/m²',min:0,max:50,step:0.5,show:p=>isS(p)||(isP(p)&&p.pType==='slab'),tip:'Uniform gravity pressure on the slab.'},
    {type:'slider',id:'Hload',label:p=>isBldg(p)?'Lateral load per floor (+X)':'Lateral load on top edge (+X)',unit:'kN',min:0,max:500,step:5,show:p=>isBldg(p)||isW(p),tip:'Horizontal load (wind / seismic), shared equally by the nodes of each floor or of the top edge.'},
    {type:'toggle',id:'selfWeight',label:'Include self-weight'}
  ]},
  { title:'Display', items:[
    {type:'select',id:'colorMode',label:'Color by',opts:[],tip:'Rainbow scale: blue = low, red = high.'},
    {type:'toggle',id:'autoScale',label:'Auto deformation scale'},
-   {type:'slider',id:'defScale',label:'Deformation scale',unit:'×',min:1,max:2000,step:1,tip:'Manual exaggeration factor of displacements.'}
+   {type:'slider',id:'defScale',label:'Deformation scale',unit:'×',min:1,max:2000,step:1,tip:'Manual exaggeration factor of displacements.'},
+   {type:'slider',id:'bmdScale',label:'Moment diagram scale',unit:'%',min:20,max:400,step:10,show:p=>isF(p)||cBm(p),tip:'Size of the bending moment diagram relative to the structure. 100% = peak moment drawn at 12% of the model size.'}
  ]}
 ];
 
@@ -875,7 +1042,7 @@ function field(it){
     s.onchange=()=>{ P[it.id]=s.value; onChange(it.id); };
     ctl[it.id]={el,set:v=>{P[it.id]=v;s.value=v;},disable:()=>{},setOpts};
   } else {
-    el=mk(`<label class="mb-3 flex items-center justify-between text-[11px] text-slate-300 cursor-pointer"><span class="flex items-center gap-1.5"><span class="lt">${labelOf(it)}</span>${tip}</span><input type="checkbox" style="accent-color:#ff9f2e;width:15px;height:15px"></label>`);
+    el=mk(`<label class="mb-3 flex items-center justify-between text-[11px] text-slate-300 cursor-pointer"><span class="flex items-center gap-1.5"><span class="lt">${labelOf(it)}</span>${tip}</span><input type="checkbox" style="accent-color:#22e06b;width:15px;height:15px"></label>`);
     const c=el.querySelector('input');
     c.onchange=()=>{ P[it.id]=c.checked; onChange(it.id); };
     ctl[it.id]={el,set:v=>{P[it.id]=v;c.checked=v;},disable:()=>{}};
@@ -899,6 +1066,9 @@ function applyVisibility(){
   });
   cardEls.forEach(c=>{ c.sec.style.display=c.els.some(({e})=>e.style.display!=='none')?'':'none'; });
   $('pillMesh').style.display=(P.struct==='wall'||P.struct==='slab')?'':'none';
+  edSec.style.display=P.struct==='custom'?'':'none';
+  $('pillBmd').style.display=(P.struct==='frame'||cBm(P))?'':'none';
+  pedSec.style.display=P.struct==='cplane'?'':'none';
 }
 function updateDisabled(){
   ctl.Pload.disable(isT(P)&&P.loadMode==='udl');
@@ -906,8 +1076,8 @@ function updateDisabled(){
   ctl.defScale.disable(P.autoScale);
 }
 function syncUI(){
-  ctl.colorMode.setOpts(COLOR_MODES[P.struct]);
-  if(!COLOR_MODES[P.struct].some(o=>o[0]===P.colorMode)) P.colorMode=COLOR_MODES[P.struct][0][0];
+  ctl.colorMode.setOpts(cModes());
+  if(!cModes().some(o=>o[0]===P.colorMode)) P.colorMode=cModes()[0][0];
   Object.keys(ctl).forEach(k=>ctl[k].set(P[k]));
   applyVisibility(); updateDisabled();
 }
@@ -916,7 +1086,18 @@ function onChange(id){
   if(id==='struct'){ Object.assign(P,PRESETS[P.struct]); syncUI(); needFit=true; }
   else if(id==='mat'&&P.mat!=='custom'){ const m=MATS[P.mat]; ctl.E.set(m.E); ctl.fy.set(m.fy); ctl.rho.set(m.rho); ctl.nu.set(m.nu); }
   else if(['E','fy','rho','nu'].includes(id)&&P.mat!=='custom') ctl.mat.set('custom');
-  if(id==='frameType'||id==='frame3D') needFit=true;
+  if(id==='frameType'||id==='frame3D'||id==='cDim') needFit=true;
+  if(id==='struct'&&P.struct==='custom'&&!CM.nodes.length) setTool('node');
+  if(id==='cDim'&&P.cDim==='2d'){ if(P.cPlane!=='XZ') ctl.cPlane.set('XZ'); CM.nodes.forEach(p=>p[1]=0); }
+  if(id==='cType'){ ctl.colorMode.setOpts(cModes()); if(!cModes().some(o=>o[0]===P.colorMode)) P.colorMode=cModes()[0][0]; ctl.colorMode.set(P.colorMode); }
+  if(id==='cDim'||id==='cType'||id==='struct') CM.pend=null;
+  if(id==='pType'){
+    if(PM.lastType!==P.pType){ PM.sup={}; PM.lastType=P.pType; }
+    pSetSupOpts(); ctl.colorMode.setOpts(cModes());
+    if(!cModes().some(o=>o[0]===P.colorMode)) P.colorMode=cModes()[0][0];
+    ctl.colorMode.set(P.colorMode); needFit=true; PM.pend=null;
+  }
+  if(id==='struct'&&P.struct==='cplane'){ PM.pend=null; if(!Object.keys(PM.cells).length) setPTool('rect'); }
   applyVisibility(); updateDisabled(); requestUpdate();
 }
 
@@ -934,14 +1115,14 @@ controls.enableDamping=true; controls.dampingFactor=0.08;
 scene.add(new THREE.AmbientLight(0xffffff,0.55)); scene.add(new THREE.HemisphereLight(0xbfd4ff,0x202530,0.6));
 const dl=new THREE.DirectionalLight(0xffffff,1.1); dl.position.set(30,-40,60); scene.add(dl);
 const dl2=new THREE.DirectionalLight(0x88aaff,0.45); dl2.position.set(-30,40,20); scene.add(dl2);
-const grid=new THREE.GridHelper(400,400,0x2e3850,0x1a2132); grid.rotation.x=Math.PI/2; grid.position.z=-0.03; scene.add(grid);
+const grid=new THREE.GridHelper(400,400,0x1f3a2a,0x0f1a14); grid.rotation.x=Math.PI/2; grid.position.z=-0.03; scene.add(grid);
 const axes=new THREE.AxesHelper(1); scene.add(axes);
 
 const cylGeo=new THREE.CylinderGeometry(1,1,1,10,1), sphGeo=new THREE.SphereGeometry(1,14,10);
 let memMesh=null,nodeMesh=null,wire=null,surf=null;
 const loadGroup=new THREE.Group(), supGroup=new THREE.Group(); scene.add(loadGroup,supGroup);
 let renderedPos=new Float32Array(0), labelEls=[];
-const TG={orig:true,def:true,stress:true,mesh:true,labels:false,loads:true,supports:true,grid:true};
+const TG={orig:true,def:true,stress:true,mesh:true,labels:false,loads:true,supports:true,grid:true,bmd:false};
 let lastModel=null,lastRes=null;
 
 function resize(){
@@ -954,7 +1135,7 @@ new ResizeObserver(resize).observe(host); resize();
 function fitView(){
   if(!lastModel) return;
   const m=lastModel, c=[0,1,2].map(k=>(m.min[k]+m.max[k])/2), d=m.size;
-  const dir=m.kind==='slab'?[0.7,-1.0,0.9]:m.kind==='wall'?[0.2,-1.3,0.3]:[0.5,-1.0,0.55];
+  const dir=(m.custom&&P.cDim==='2d')?[0.02,-1.0,0.1]:m.kind==='slab'?[0.7,-1.0,0.9]:m.kind==='wall'?[0.2,-1.3,0.3]:[0.5,-1.0,0.55];
   const dist=d*1.5;
   controls.target.set(c[0],c[1],c[2]);
   camera.position.set(c[0]+dir[0]*dist,c[1]+dir[1]*dist,c[2]+dir[2]*dist);
@@ -971,7 +1152,7 @@ function setLegend(meta,lo,hi,title){
 
 function renderScene(model,res){
   const N=model.nn, isLine=model.isLine;
-  const sc=(res.unstable||res.tooLarge)?0:(P.autoScale?autoScaleFactor(model,res):P.defScale);
+  const sc=(res.unstable||res.tooLarge||editing()||pEditing()||(TG.bmd&&model.kind==='frame'))?0:(P.autoScale?autoScaleFactor(model,res):P.defScale);
   const pos=new Float32Array(3*N), d3=[0,0,0];
   for(let i=0;i<N;i++){ disp3(model,res.u,i,d3); for(let k=0;k<3;k++) pos[3*i+k]=model.nodes[i][k]+(TG.def?sc*d3[k]:0); }
   renderedPos=pos;
@@ -979,7 +1160,7 @@ function renderScene(model,res){
   disposeSurface();
   if(wire){scene.remove(wire);wire.geometry.dispose();wire.material.dispose();wire=null;}
   if(isLine) renderLines(model,res,pos); else renderSurface(model,res,pos);
-  renderLoads(model,pos); renderSupports(model);
+  renderLoads(model,pos); renderSupports(model); if(model.kind==='frame') renderBMD(model,res); else clearBMD(); updateOverlay(); updatePOverlay();
   grid.visible=TG.grid; axes.visible=TG.grid; axes.scale.setScalar(model.size*0.08);
   const lab=$('labels');
   if(labelEls.length!==N){ lab.innerHTML=''; labelEls=[]; if(N<=400) for(let i=0;i<N;i++){ const d=document.createElement('div'); d.className='lbl'; d.textContent='N'+i; lab.appendChild(d); labelEls.push(d);} }
@@ -988,17 +1169,18 @@ function renderScene(model,res){
 
 function renderLines(model,res,pos){
   const els=model.els, M=els.length, N=model.nn;
-  if(!memMesh||memMesh.count!==M){
+  const Mc=Math.max(M,1), Nc=Math.max(N,1);
+  if(!memMesh||memMesh.userData.cap!==Mc){
     if(memMesh){scene.remove(memMesh);memMesh.material.dispose();memMesh.dispose();}
-    memMesh=new THREE.InstancedMesh(cylGeo,new THREE.MeshStandardMaterial({roughness:0.5,metalness:0.15}),M);
-    memMesh.frustumCulled=false; scene.add(memMesh);
+    memMesh=new THREE.InstancedMesh(cylGeo,new THREE.MeshStandardMaterial({roughness:0.5,metalness:0.15}),Mc);
+    memMesh.userData.cap=Mc; memMesh.frustumCulled=false; scene.add(memMesh);
   }
-  if(!nodeMesh||nodeMesh.count!==N){
+  if(!nodeMesh||nodeMesh.userData.cap!==Nc){
     if(nodeMesh){scene.remove(nodeMesh);nodeMesh.material.dispose();nodeMesh.dispose();}
-    nodeMesh=new THREE.InstancedMesh(sphGeo,new THREE.MeshStandardMaterial({color:0xcfd8e6,roughness:0.4,metalness:0.3}),N);
-    nodeMesh.frustumCulled=false; scene.add(nodeMesh);
+    nodeMesh=new THREE.InstancedMesh(sphGeo,new THREE.MeshStandardMaterial({color:0xcfd8e6,roughness:0.4,metalness:0.3}),Nc);
+    nodeMesh.userData.cap=Nc; nodeMesh.frustumCulled=false; scene.add(nodeMesh);
   }
-  memMesh.visible=true; nodeMesh.visible=true;
+  memMesh.count=M; nodeMesh.count=N; memMesh.visible=M>0; nodeMesh.visible=N>0;
   const mode=COLOR_MODES[model.kind].some(o=>o[0]===P.colorMode)?P.colorMode:COLOR_MODES[model.kind][0][0];
   const meta=META[mode], vals=res.lineVals[mode];
   let mxA=1e-12; vals.forEach(v=>{ if(Math.abs(v)>mxA) mxA=Math.abs(v); });
@@ -1016,9 +1198,9 @@ function renderLines(model,res,pos){
     if(TG.stress) hueColor((vals[e]-lo)/((hi-lo)||1),col); else col.set(0x9fb0c6);
     memMesh.setColorAt(e,col);
   });
-  memMesh.instanceMatrix.needsUpdate=true; memMesh.instanceColor.needsUpdate=true; memMesh.computeBoundingSphere();
+  memMesh.instanceMatrix.needsUpdate=true; if(memMesh.instanceColor) memMesh.instanceColor.needsUpdate=true; memMesh.computeBoundingSphere();
   const nq=new THREE.Quaternion(), nv=new THREE.Vector3(), ns=new THREE.Vector3();
-  for(let i=0;i<N;i++){ const r=(nodeR[i]||0.02)*1.25; nv.set(pos[3*i],pos[3*i+1],pos[3*i+2]); ns.set(r,r,r); m4.compose(nv,nq,ns); nodeMesh.setMatrixAt(i,m4); }
+  for(let i=0;i<N;i++){ const r=(nodeR[i]||(model.custom?Math.max(0.07,model.size*0.008):0.02))*1.25; nv.set(pos[3*i],pos[3*i+1],pos[3*i+2]); ns.set(r,r,r); m4.compose(nv,nq,ns); nodeMesh.setMatrixAt(i,m4); }
   nodeMesh.instanceMatrix.needsUpdate=true;
   if(TG.orig){
     const arr=new Float32Array(M*6);
@@ -1037,6 +1219,7 @@ function disposeSurface(){
 function renderSurface(model,res,pos){
   if(memMesh) memMesh.visible=false; if(nodeMesh) nodeMesh.visible=false;
   const N=model.nn, els=model.els;
+  if(!els.length){ setLegend(META.vm,0,1,'—'); return; }
   const mode=COLOR_MODES[model.kind].some(o=>o[0]===P.colorMode)?P.colorMode:COLOR_MODES[model.kind][0][0];
   const meta=META[mode];
   const vals=mode==='disp'?Array.from(res.dmag,v=>v*1000):res.nodeVals[mode];
@@ -1047,7 +1230,7 @@ function renderSurface(model,res,pos){
   else { title={vm:'Von Mises σ, top fibre (MPa)',s1:'σx, top fibre (MPa)',s2:'σy, top fibre (MPa)',t12:'τxy, top fibre (MPa)',disp:'Deflection |w| (mm)'}[mode]; }
   setLegend(meta,lo,hi,title);
   const col=new THREE.Color(), colors=new Float32Array(N*3);
-  for(let i=0;i<N;i++){ if(TG.stress) hueColor((vals[i]-lo)/((hi-lo)||1),col); else col.set(0x9fb0c6); colors[3*i]=col.r; colors[3*i+1]=col.g; colors[3*i+2]=col.b; }
+  for(let i=0;i<N;i++){ if(TG.stress&&!pEditing()) hueColor((vals[i]-lo)/((hi-lo)||1),col); else col.set(0x9fb0c6); colors[3*i]=col.r; colors[3*i+1]=col.g; colors[3*i+2]=col.b; }
   const idx=[], edgeSet=new Set(), edgeIdx=[];
   els.forEach(el=>{
     const [a,b,c,d]=el.nodes; idx.push(a,b,c,a,c,d);
@@ -1059,7 +1242,7 @@ function renderSurface(model,res,pos){
   const group=new THREE.Group(); group.add(mesh);
   if(TG.mesh){
     const eg=new THREE.BufferGeometry(); eg.setAttribute('position',posAttr); eg.setIndex(edgeIdx);
-    group.add(new THREE.LineSegments(eg,new THREE.LineBasicMaterial({color:0x0b0e14,transparent:true,opacity:0.45})));
+    group.add(new THREE.LineSegments(eg,new THREE.LineBasicMaterial({color:0x000000,transparent:true,opacity:0.45})));
   }
   if(TG.orig&&TG.def){
     const op=new Float32Array(N*3); for(let i=0;i<N;i++) for(let k=0;k<3;k++) op[3*i+k]=model.nodes[i][k];
@@ -1080,7 +1263,7 @@ function renderLoads(model,pos){
   for(let q=0;q<list.length;q+=stride){
     const [i,m]=list[q], dir=new THREE.Vector3(f3[3*i]/m,f3[3*i+1]/m,f3[3*i+2]/m);
     const len=Math.max(0.25*base,base*m/maxF), p=new THREE.Vector3(pos[3*i],pos[3*i+1],pos[3*i+2]).addScaledVector(dir,-len);
-    loadGroup.add(new THREE.ArrowHelper(dir,p,len,0xffb347,Math.min(len*0.35,base*0.25),Math.min(len*0.2,base*0.15)));
+    loadGroup.add(new THREE.ArrowHelper(dir,p,len,0x22e06b,Math.min(len*0.35,base*0.25),Math.min(len*0.2,base*0.15)));
   }
 }
 function renderSupports(model){
@@ -1091,10 +1274,60 @@ function renderSupports(model){
     if(k%stride) return;
     const n=model.nodes[sp.node]; let mesh;
     if(sp.type==='fixed'){ mesh=new THREE.Mesh(new THREE.BoxGeometry(sz*1.6,sz*1.6,sz*0.8),new THREE.MeshStandardMaterial({color:0xf472b6})); mesh.position.set(n[0],n[1],n[2]-sz*0.4); }
-    else { mesh=new THREE.Mesh(new THREE.ConeGeometry(sz,sz*1.8,16),new THREE.MeshStandardMaterial({color:sp.type==='pin'?0x34d399:0x38bdf8})); mesh.rotation.x=Math.PI/2; mesh.position.set(n[0],n[1],n[2]-sz*0.9); }
+    else { mesh=new THREE.Mesh(new THREE.ConeGeometry(sz,sz*1.8,16),new THREE.MeshStandardMaterial({color:sp.type==='pin'?0xfbbf24:0x38bdf8})); mesh.rotation.x=Math.PI/2; mesh.position.set(n[0],n[1],n[2]-sz*0.9); }
     supGroup.add(mesh);
     if(sp.type==='roller'){ const rl=new THREE.Mesh(new THREE.SphereGeometry(sz*0.4,12,8),new THREE.MeshStandardMaterial({color:0x7dd3fc})); rl.position.set(n[0],n[1],n[2]-sz*2.1); supGroup.add(rl); }
   });
+}
+
+/* =========================================================
+   BENDING MOMENT DIAGRAM (drawn on the tension side)
+   Displayed moment v = -sign * M_local. Sagging of a beam = positive (red), hogging = negative (blue).
+   ========================================================= */
+const BMD_SIGN={my:-1,mz:1};
+const bmdGroup=new THREE.Group(); scene.add(bmdGroup);
+const bmdFillMat=new THREE.MeshBasicMaterial({vertexColors:true,transparent:true,opacity:0.42,side:THREE.DoubleSide,depthWrite:false});
+const bmdLineMat=new THREE.LineBasicMaterial({vertexColors:true});
+const bmdHost=$('bmdLab'); let bmdLabels=[];
+function clearBMD(){ bmdGroup.children.forEach(c=>c.geometry&&c.geometry.dispose()); bmdGroup.clear(); bmdHost.innerHTML=''; bmdLabels=[]; }
+function renderBMD(model,res){
+  clearBMD();
+  if(!TG.bmd||!res.bmd||res.unstable||res.tooLarge||!(res.bmdMax>1e-9)) return;
+  const NS=res.bmd[0].my.length-1, scale=0.12*model.size*(P.bmdScale/100)/res.bmdMax;
+  const comps=model.planar?['my']:['my','mz'];
+  const fp=[],fc=[],lp=[],lc=[],cand=[], cP=[0.97,0.44,0.44], cN=[0.38,0.65,0.98];
+  model.els.forEach((el,e)=>{
+    const A=model.nodes[el.nodes[0]], B=model.nodes[el.nodes[1]];
+    const d=[(B[0]-A[0])/el.L,(B[1]-A[1])/el.L,(B[2]-A[2])/el.L], R=localAxes(d);
+    comps.forEach(c=>{
+      const S=res.bmd[e][c], ax=c==='my'?R[2]:R[1], sg=BMD_SIGN[c], v=k=>-sg*S[k], col=k=>v(k)>=0?cP:cN;
+      const P0=[],Q0=[];
+      for(let k=0;k<=NS;k++){
+        const t=k/NS, off=-v(k)*scale, p=[A[0]+(B[0]-A[0])*t,A[1]+(B[1]-A[1])*t,A[2]+(B[2]-A[2])*t];
+        P0.push(p); Q0.push([p[0]+ax[0]*off,p[1]+ax[1]*off,p[2]+ax[2]*off]);
+      }
+      for(let k=0;k<NS;k++){
+        const quad=[P0[k],P0[k+1],Q0[k+1],Q0[k]], cc=[col(k),col(k+1),col(k+1),col(k)];
+        [0,1,2,0,2,3].forEach(i=>{ fp.push(...quad[i]); fc.push(...cc[i]); });
+        lp.push(...Q0[k],...Q0[k+1]); lc.push(...col(k),...col(k+1));
+      }
+      [0,NS].forEach(k=>{ lp.push(...P0[k],...Q0[k]); lc.push(...col(k),...col(k)); });
+      let km=0; for(let k=1;k<=NS;k++) if(Math.abs(S[k])>Math.abs(S[km])) km=k;
+      cand.push({v:v(km),p:Q0[km]});
+    });
+  });
+  const mkG=(pos,colr)=>{ const g=new THREE.BufferGeometry(); g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3)); g.setAttribute('color',new THREE.Float32BufferAttribute(colr,3)); return g; };
+  if(fp.length) bmdGroup.add(new THREE.Mesh(mkG(fp,fc),bmdFillMat));
+  if(lp.length) bmdGroup.add(new THREE.LineSegments(mkG(lp,lc),bmdLineMat));
+  cand.sort((a,b)=>Math.abs(b.v)-Math.abs(a.v));
+  const seen=new Set(); let n=0;
+  for(const q of cand){
+    if(n>=40||Math.abs(q.v)<0.08*res.bmdMax) break;
+    const key=q.p.map(x=>x.toFixed(2)).join('|'); if(seen.has(key)) continue; seen.add(key);
+    const el=document.createElement('div'); el.className='blb'; el.textContent=q.v.toFixed(1); bmdHost.appendChild(el);
+    bmdLabels.push({el,pos:new THREE.Vector3(q.p[0],q.p[1],q.p[2]),text:q.v.toFixed(1)}); n++;
+  }
+  $('lgNote').textContent+=` · BMD peak ${res.bmdMax.toFixed(1)} kN·m, on tension side (red +, blue −)`;
 }
 
 const _v=new THREE.Vector3();
@@ -1107,7 +1340,14 @@ function updateLabels(){
     el.style.display='block'; el.style.left=((_v.x*0.5+0.5)*w)+'px'; el.style.top=((-_v.y*0.5+0.5)*h)+'px';
   }
 }
-(function animate(){ requestAnimationFrame(animate); controls.update(); updateLabels(); renderer.render(scene,camera); })();
+function updateBmdLabels(){
+  if(!bmdLabels.length) return;
+  const w=host.clientWidth,h=host.clientHeight;
+  for(const l of bmdLabels){ _v.copy(l.pos).project(camera); const el=l.el;
+    if(_v.z>1||_v.z<-1){el.style.display='none';continue;}
+    el.style.display='block'; el.style.left=((_v.x*0.5+0.5)*w)+'px'; el.style.top=((-_v.y*0.5+0.5)*h)+'px'; }
+}
+(function animate(){ requestAnimationFrame(animate); controls.update(); updateLabels(); updateBmdLabels(); renderer.render(scene,camera); })();
 
 const ray=new THREE.Raycaster(), mouse=new THREE.Vector2(), hov=$('hover');
 renderer.domElement.addEventListener('pointermove',ev=>{
@@ -1127,9 +1367,452 @@ document.querySelectorAll('#toggles .pill').forEach(p=>{
 });
 
 /* =========================================================
+   CUSTOM MODELLING EDITOR (click-to-model in the viewport)
+   ========================================================= */
+const CM={nodes:[],mem:[],sup:{},load:{},tool:'view',pend:null,sel:null,hist:[]};
+const TOOLS=[['view','View results'],['node','Node'],['member','Member'],['select','Select'],['support','Support'],['load','Load'],['delete','Delete']];
+const HINTS={
+  view:'Result view: deformed shape and stresses are shown. Pick a tool to edit the model (deformation is hidden while editing).',
+  node:'Click on the work plane to place a node (snaps to the grid). Clicking an existing node does nothing.',
+  member:'Click a start node (or an empty grid point), then an end node. The chain continues from the last node; press Esc or click the same node to stop.',
+  select:'Click a node to edit its coordinates numerically.',
+  support:'Click a node to assign the support type chosen below.',
+  load:'Click a node to set its nodal load. All-zero values remove the load.',
+  delete:'Click a node (also removes its members) or a member to delete it.'
+};
+const editing=()=>P.struct==='custom'&&CM.tool!=='view';
+
+const edSec=mk(`<section class="mb-3 rounded-lg border border-green-400/30 bg-white/[0.03] overflow-hidden"><header class="flex items-center justify-between px-3 py-1.5 bg-white/[0.05] border-b border-white/10"><div class="flex items-center gap-2"><span class="port"></span><span class="text-[11px] font-semibold tracking-wider uppercase text-slate-200">Modelling tools</span></div><span class="port out"></span></header><div class="p-3">
+<div id="edTools" class="flex flex-wrap gap-1.5 mb-2"></div>
+<div id="edHint" class="text-[10px] text-green-200/80 mb-3 leading-snug"></div>
+<div id="edOptSup" class="mb-3"><div class="text-[11px] text-slate-300 mb-1">Support type to assign</div><select id="edSup" class="sel"><option value="pin">Pin (ux, uy, uz)</option><option value="roller">Roller (uz only)</option><option value="fixed">Fixed (beam: + rotations)</option><option value="none">Remove support</option></select></div>
+<div id="edOptLoad" class="mb-3"><div class="text-[11px] text-slate-300 mb-1">Nodal load (kN, global axes)</div><div class="grid grid-cols-3 gap-1.5"><label class="text-[10px] text-slate-400">Fx<input id="edFx" type="number" step="5" value="0" class="num" style="width:100%"></label><label class="text-[10px] text-slate-400">Fy<input id="edFy" type="number" step="5" value="0" class="num" style="width:100%"></label><label class="text-[10px] text-slate-400">Fz<input id="edFz" type="number" step="5" value="-50" class="num" style="width:100%"></label></div></div>
+<div id="edOptSel" class="mb-3"><div class="text-[11px] text-slate-300 mb-1">Selected node <span id="edSelId" class="text-green-300"></span> (m)</div><div class="grid grid-cols-3 gap-1.5"><label class="text-[10px] text-slate-400">X<input id="edX" type="number" step="0.1" class="num" style="width:100%"></label><label class="text-[10px] text-slate-400">Y<input id="edY" type="number" step="0.1" class="num" style="width:100%"></label><label class="text-[10px] text-slate-400">Z<input id="edZ" type="number" step="0.1" class="num" style="width:100%"></label></div></div>
+<div id="edInfo" class="text-[10px] text-slate-500 mb-2">—</div>
+<div class="flex gap-2 mb-2"><button class="btn" id="edUndo" title="Undo last edit (Ctrl+Z)">Undo</button><button class="btn" id="edClear">Clear all</button><button class="btn" id="edEx" title="Load a sample 2D truss">Example</button></div>
+<div class="flex gap-2"><button class="btn" id="edSave">Save JSON</button><button class="btn" id="edLoad">Load JSON</button></div><input type="file" id="edFile" accept=".json,application/json" class="hidden">
+</div></section>`);
+$('panels').insertBefore(edSec,cardEls[1].sec.nextSibling);
+const eq=s=>edSec.querySelector(s);
+const toolPills={};
+TOOLS.forEach(([k,l])=>{ const s=document.createElement('span'); s.className='pill'; s.textContent=l; s.onclick=()=>setTool(k); eq('#edTools').appendChild(s); toolPills[k]=s; });
+
+function snapshot(){ CM.hist.push(JSON.stringify({n:CM.nodes,m:CM.mem,s:CM.sup,l:CM.load})); if(CM.hist.length>60) CM.hist.shift(); }
+function restore(o){ CM.nodes=o.n; CM.mem=o.m; CM.sup=o.s; CM.load=o.l; CM.pend=null; CM.sel=null; }
+function undo(){ const s=CM.hist.pop(); if(!s) return; restore(JSON.parse(s)); edChanged(); }
+function edChanged(){ refreshEd(); requestUpdate(); }
+function setTool(t){
+  CM.tool=t; CM.pend=null;
+  Object.keys(toolPills).forEach(k=>toolPills[k].classList.toggle('on',k===t));
+  eq('#edHint').textContent=HINTS[t];
+  refreshEd(); requestUpdate();
+}
+function refreshEd(){
+  eq('#edOptSup').style.display=CM.tool==='support'?'':'none';
+  eq('#edOptLoad').style.display=CM.tool==='load'?'':'none';
+  const showSel=CM.tool==='select'&&CM.sel!==null&&CM.nodes[CM.sel];
+  eq('#edOptSel').style.display=showSel?'':'none';
+  if(showSel){ const p=CM.nodes[CM.sel]; eq('#edSelId').textContent='N'+CM.sel; eq('#edX').value=p[0]; eq('#edY').value=p[1]; eq('#edZ').value=p[2]; eq('#edY').disabled=P.cDim==='2d'; }
+  eq('#edInfo').textContent=`${CM.nodes.length} nodes · ${CM.mem.length} members · ${Object.keys(CM.sup).length} supports · ${Object.keys(CM.load).length} loaded nodes`;
+}
+function addNodeAt(p){
+  for(let i=0;i<CM.nodes.length;i++){ const q=CM.nodes[i]; if(Math.hypot(q[0]-p[0],q[1]-p[1],q[2]-p[2])<1e-6) return i; }
+  CM.nodes.push(p.slice()); return CM.nodes.length-1;
+}
+function addMemberIds(a,b){
+  if(a===b) return;
+  if(CM.mem.some(m=>(m.a===a&&m.b===b)||(m.a===b&&m.b===a))) return;
+  CM.mem.push({a,b});
+}
+function removeNode(id){
+  CM.nodes.splice(id,1);
+  CM.mem=CM.mem.filter(m=>m.a!==id&&m.b!==id).map(m=>({a:m.a>id?m.a-1:m.a,b:m.b>id?m.b-1:m.b}));
+  const re=o=>{ const r={}; for(const k in o){ const i=+k; if(i===id) continue; r[i>id?i-1:i]=o[k]; } return r; };
+  CM.sup=re(CM.sup); CM.load=re(CM.load); CM.pend=null; CM.sel=null;
+}
+
+/* ----- picking & work plane ----- */
+const wpPlane=new THREE.Plane(), _hit=new THREE.Vector3(), _pv=new THREE.Vector3();
+function planePoint(ev){
+  const rc=renderer.domElement.getBoundingClientRect();
+  mouse.set(((ev.clientX-rc.left)/rc.width)*2-1,-((ev.clientY-rc.top)/rc.height)*2+1);
+  ray.setFromCamera(mouse,camera);
+  const d2=P.cDim==='2d', pl=d2?'XZ':P.cPlane, off=d2?0:P.cOff;
+  const nrm=pl==='XZ'?[0,1,0]:pl==='XY'?[0,0,1]:[1,0,0];
+  wpPlane.set(new THREE.Vector3(nrm[0],nrm[1],nrm[2]),-off);
+  if(!ray.ray.intersectPlane(wpPlane,_hit)) return null;
+  const s=P.cSnap, p=[_hit.x,_hit.y,_hit.z];
+  for(let k=0;k<3;k++) p[k]=nrm[k]?off:+(Math.round(p[k]/s)*s).toFixed(6);
+  if(Math.hypot(p[0],p[1],p[2])>1e4) return null;
+  return p;
+}
+function screenOf(p){
+  _pv.set(p[0],p[1],p[2]).project(camera);
+  const rc=renderer.domElement.getBoundingClientRect();
+  return [rc.left+(_pv.x*0.5+0.5)*rc.width, rc.top+(-_pv.y*0.5+0.5)*rc.height, _pv.z];
+}
+function pickNode(ev,tol=14){
+  let best=-1,bd=tol;
+  CM.nodes.forEach((p,i)=>{ const s=screenOf(p); if(s[2]>1) return; const d=Math.hypot(s[0]-ev.clientX,s[1]-ev.clientY); if(d<bd){bd=d;best=i;} });
+  return best;
+}
+function segDist(px,py,ax,ay,bx,by){
+  const dx=bx-ax,dy=by-ay,l2=dx*dx+dy*dy; let t=l2?((px-ax)*dx+(py-ay)*dy)/l2:0; t=Math.max(0,Math.min(1,t));
+  return Math.hypot(px-(ax+t*dx),py-(ay+t*dy));
+}
+function pickMember(ev,tol=9){
+  let best=-1,bd=tol;
+  CM.mem.forEach((m,i)=>{
+    const a=screenOf(CM.nodes[m.a]), b=screenOf(CM.nodes[m.b]); if(a[2]>1||b[2]>1) return;
+    const d=segDist(ev.clientX,ev.clientY,a[0],a[1],b[0],b[1]); if(d<bd){bd=d;best=i;}
+  });
+  return best;
+}
+
+/* ----- click actions ----- */
+function editClick(ev){
+  const t=CM.tool, nid=pickNode(ev);
+  if(t==='node'){
+    if(nid>=0) return;
+    const p=planePoint(ev); if(!p) return;
+    snapshot(); addNodeAt(p);
+  } else if(t==='member'){
+    let id=nid;
+    if(id<0){ const p=planePoint(ev); if(!p) return; snapshot(); id=addNodeAt(p); } else snapshot();
+    if(CM.pend===null) CM.pend=id;
+    else if(CM.pend===id) CM.pend=null;
+    else { addMemberIds(CM.pend,id); CM.pend=id; }
+  } else if(t==='select'){
+    CM.sel=nid>=0?nid:null;
+  } else if(t==='support'){
+    if(nid<0) return; snapshot();
+    const ty=eq('#edSup').value; if(ty==='none') delete CM.sup[nid]; else CM.sup[nid]=ty;
+  } else if(t==='load'){
+    if(nid<0) return; snapshot();
+    const v=['#edFx','#edFy','#edFz'].map(q=>parseFloat(eq(q).value)||0);
+    if(v.every(x=>x===0)) delete CM.load[nid]; else CM.load[nid]=v;
+  } else if(t==='delete'){
+    if(nid>=0){ snapshot(); removeNode(nid); }
+    else { const mi=pickMember(ev); if(mi<0) return; snapshot(); CM.mem.splice(mi,1); }
+  }
+  edChanged();
+}
+
+/* ----- overlay: work-plane grid, cursor, rubber band, highlights ----- */
+const edGroup=new THREE.Group(); scene.add(edGroup);
+const mCur=new THREE.MeshBasicMaterial({color:0x6ff0a0}), mPend=new THREE.MeshBasicMaterial({color:0xfacc15}),
+      mSel=new THREE.MeshBasicMaterial({color:0xf472b6,transparent:true,opacity:0.85}), mHov=new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:0.55});
+let wpGrid=null, wpKey='', hoverNode=-1, cursorP=null;
+function updateWP(){
+  const d2=P.cDim==='2d', pl=d2?'XZ':P.cPlane, off=d2?0:P.cOff, key=pl+'|'+off+'|'+P.cSnap;
+  if(key===wpKey&&wpGrid) return; wpKey=key;
+  if(wpGrid){ scene.remove(wpGrid); wpGrid.geometry.dispose(); wpGrid.material.dispose(); }
+  wpGrid=new THREE.GridHelper(60,Math.min(600,Math.round(60/P.cSnap)),0x2f7a4d,0x1a3326);
+  wpGrid.material.transparent=true; wpGrid.material.opacity=0.6;
+  if(pl==='XZ') wpGrid.position.set(20,off,20);
+  else if(pl==='XY'){ wpGrid.rotation.x=Math.PI/2; wpGrid.position.set(20,20,off); }
+  else { wpGrid.rotation.z=Math.PI/2; wpGrid.position.set(off,20,20); }
+  scene.add(wpGrid);
+}
+function updateOverlay(){
+  edGroup.children.forEach(c=>{ if(c.isLine) c.geometry.dispose(); }); edGroup.clear();
+  const on=editing();
+  if(!on){ if(wpGrid) wpGrid.visible=false; return; }
+  updateWP(); wpGrid.visible=true;
+  const r=Math.max(0.09,(lastModel?lastModel.size:10)*0.012);
+  const dot=(p,s,m)=>{ const o=new THREE.Mesh(sphGeo,m); o.position.set(p[0],p[1],p[2]); o.scale.setScalar(s); edGroup.add(o); };
+  if(CM.sel!==null&&CM.nodes[CM.sel]) dot(CM.nodes[CM.sel],r*1.6,mSel);
+  if(CM.pend!==null&&CM.nodes[CM.pend]) dot(CM.nodes[CM.pend],r*1.6,mPend);
+  if(hoverNode>=0&&CM.nodes[hoverNode]) dot(CM.nodes[hoverNode],r*1.4,mHov);
+  else if(cursorP&&(CM.tool==='node'||CM.tool==='member')) dot(cursorP,r*0.8,mCur);
+  if(CM.tool==='member'&&CM.pend!==null&&CM.nodes[CM.pend]){
+    const tgt=(hoverNode>=0&&CM.nodes[hoverNode])?CM.nodes[hoverNode]:cursorP;
+    if(tgt){ const a=CM.nodes[CM.pend], g=new THREE.BufferGeometry(); g.setAttribute('position',new THREE.BufferAttribute(new Float32Array([a[0],a[1],a[2],tgt[0],tgt[1],tgt[2]]),3));
+      edGroup.add(new THREE.Line(g,new THREE.LineBasicMaterial({color:0xfacc15}))); }
+  }
+}
+let downAt=null;
+renderer.domElement.addEventListener('pointerdown',ev=>{ downAt=[ev.clientX,ev.clientY,ev.button]; });
+renderer.domElement.addEventListener('pointerup',ev=>{
+  if(!downAt) return; const mv=Math.hypot(ev.clientX-downAt[0],ev.clientY-downAt[1]), b=downAt[2]; downAt=null;
+  if(mv<5&&b===0&&editing()) editClick(ev);
+});
+renderer.domElement.addEventListener('pointermove',ev=>{
+  if(!editing()||ev.buttons) return;
+  cursorP=planePoint(ev); hoverNode=pickNode(ev); updateOverlay();
+});
+window.addEventListener('keydown',ev=>{
+  if(P.struct!=='custom') return;
+  const tg=ev.target&&ev.target.tagName; if(tg==='INPUT'||tg==='SELECT'||tg==='TEXTAREA') return;
+  if(ev.key==='Escape'){ CM.pend=null; updateOverlay(); }
+  else if((ev.ctrlKey||ev.metaKey)&&ev.key.toLowerCase()==='z'){ ev.preventDefault(); undo(); }
+  else if((ev.key==='Delete'||ev.key==='Backspace')&&CM.sel!==null&&CM.nodes[CM.sel]){ snapshot(); removeNode(CM.sel); edChanged(); }
+});
+
+/* ----- panel buttons / numeric edit / files ----- */
+['#edX','#edY','#edZ'].forEach((q,k)=>{ eq(q).onchange=()=>{
+  if(CM.sel===null||!CM.nodes[CM.sel]) return; const v=parseFloat(eq(q).value); if(!isFinite(v)) return;
+  snapshot(); CM.nodes[CM.sel][k]=v; if(P.cDim==='2d') CM.nodes[CM.sel][1]=0; edChanged();
+}; });
+eq('#edUndo').onclick=undo;
+eq('#edClear').onclick=()=>{ if(!CM.nodes.length) return; snapshot(); CM.nodes=[]; CM.mem=[]; CM.sup={}; CM.load={}; CM.pend=null; CM.sel=null; edChanged(); };
+eq('#edEx').onclick=()=>{
+  snapshot();
+  const n=[[0,0,0],[4,0,0],[8,0,0],[12,0,0],[2,0,2.5],[6,0,2.5],[10,0,2.5]];
+  const m=[[0,1],[1,2],[2,3],[4,5],[5,6],[0,4],[4,1],[1,5],[5,2],[2,6],[6,3]];
+  CM.nodes=n; CM.mem=m.map(([a,b])=>({a,b})); CM.sup={0:'pin',3:'roller'}; CM.load={4:[0,0,-50],5:[0,0,-50],6:[0,0,-50]}; CM.pend=null; CM.sel=null;
+  ctl.cType.set('truss'); ctl.cDim.set('2d'); ctl.cPlane.set('XZ'); needFit=true;
+  onChange('cType'); setTool('view'); onChange('cDim');
+};
+eq('#edSave').onclick=()=>{
+  const o={app:'ParaFEA',version:1,cType:P.cType,cDim:P.cDim,mat:P.mat,E:P.E,fy:P.fy,rho:P.rho,nu:P.nu,A:P.A,bB:P.bB,bH:P.bH,
+    nodes:CM.nodes,members:CM.mem.map(m=>[m.a,m.b]),supports:CM.sup,loads:CM.load};
+  download('parafea_model.json',JSON.stringify(o,null,1),'application/json');
+};
+eq('#edLoad').onclick=()=>eq('#edFile').click();
+eq('#edFile').onchange=ev=>{
+  const f=ev.target.files[0]; if(!f) return; const rd=new FileReader();
+  rd.onload=()=>{
+    try{
+      const o=JSON.parse(rd.result), nn=Array.isArray(o.nodes)?o.nodes.length:-1;
+      const okN=nn>=0&&o.nodes.every(p=>Array.isArray(p)&&p.length===3&&p.every(Number.isFinite));
+      const okM=Array.isArray(o.members)&&o.members.every(m=>Array.isArray(m)&&m.length===2&&Number.isInteger(m[0])&&Number.isInteger(m[1])&&m[0]>=0&&m[1]>=0&&m[0]<nn&&m[1]<nn);
+      if(!okN||!okM) throw new Error('invalid structure');
+      const sup={}, load={};
+      for(const k in (o.supports||{})){ const i=+k, t=o.supports[k]; if(Number.isInteger(i)&&i>=0&&i<nn&&['pin','roller','fixed'].includes(t)) sup[i]=t; }
+      for(const k in (o.loads||{})){ const i=+k, v=o.loads[k]; if(Number.isInteger(i)&&i>=0&&i<nn&&Array.isArray(v)&&v.length===3&&v.every(Number.isFinite)) load[i]=v; }
+      snapshot();
+      CM.nodes=o.nodes.map(p=>p.slice()); CM.mem=o.members.map(([a,b])=>({a,b})); CM.sup=sup; CM.load=load; CM.pend=null; CM.sel=null;
+      if(o.cType==='truss'||o.cType==='beam') ctl.cType.set(o.cType);
+      if(o.cDim==='2d'||o.cDim==='3d') ctl.cDim.set(o.cDim);
+      ['A','bB','bH','E','fy','rho','nu'].forEach(k=>{ if(Number.isFinite(o[k])) ctl[k].set(o[k]); });
+      ctl.mat.set(MATS[o.mat]||o.mat==='custom'?o.mat:'custom');
+      needFit=true; onChange('cType'); onChange('cDim');
+    } catch(e){ alert('Could not load model: '+e.message); }
+  };
+  rd.readAsText(f); ev.target.value='';
+};
+Object.keys(toolPills).forEach(k=>toolPills[k].classList.toggle('on',k===CM.tool));
+eq('#edHint').textContent=HINTS[CM.tool]; refreshEd();
+
+/* =========================================================
+   CUSTOM PLANE EDITOR (paint rectangular regions of Q4 cells on a grid)
+   ========================================================= */
+const PM={cells:{},sup:{},load:{},lines:[],tool:'view',pend:null,hist:[],lastType:'wall'};
+const PTOOLS=[['view','View results'],['rect','Add region'],['cut','Cut opening'],['cell','Toggle cell'],['support','Support'],['pload','Point load'],['lload','Line load']];
+const PHINTS={
+  view:'Result view: stresses and deformation are shown. Pick a tool to edit the plane (deformation is hidden while editing).',
+  rect:'Click two opposite corners (grid points) to add a rectangular block of elements. Repeat to build L-, T- or U-shaped plates.',
+  cut:'Click two opposite corners to remove a rectangular block of elements (door, window or void).',
+  cell:'Click a cell to add or remove a single element.',
+  support:'Click two grid points: every grid point on the line between them gets the support type below. Click the same point twice for a single node.',
+  pload:'Click a node to apply the point load below (kN). Zero values remove it. A slab uses Fz only.',
+  lload:'Click two grid points: the load below (kN/m) is distributed along the line between them. A slab uses Fz only.'
+};
+const pEditing=()=>P.struct==='cplane'&&PM.tool!=='view';
+const pedSec=mk(`<section class="mb-3 rounded-lg border border-green-400/30 bg-white/[0.03] overflow-hidden"><header class="flex items-center justify-between px-3 py-1.5 bg-white/[0.05] border-b border-white/10"><div class="flex items-center gap-2"><span class="port"></span><span class="text-[11px] font-semibold tracking-wider uppercase text-slate-200">Plane modelling tools</span></div><span class="port out"></span></header><div class="p-3">
+<div id="pTools" class="flex flex-wrap gap-1.5 mb-2"></div>
+<div id="pHint" class="text-[10px] text-green-200/80 mb-3 leading-snug"></div>
+<div id="pOptSup" class="mb-3"><div class="text-[11px] text-slate-300 mb-1">Support type to assign</div><select id="pSup" class="sel"></select></div>
+<div id="pOptLoad" class="mb-3"><div class="text-[11px] text-slate-300 mb-1">Load (point: kN · line: kN/m, global axes)</div><div class="grid grid-cols-2 gap-1.5"><label class="text-[10px] text-slate-400">Fx<input id="pFx" type="number" step="5" value="0" class="num" style="width:100%"></label><label class="text-[10px] text-slate-400">Fz<input id="pFz" type="number" step="5" value="-50" class="num" style="width:100%"></label></div></div>
+<div id="pInfo" class="text-[10px] text-slate-500 mb-2">—</div>
+<div class="flex gap-2 mb-2"><button class="btn" id="pUndo" title="Undo last edit (Ctrl+Z)">Undo</button><button class="btn" id="pClear">Clear all</button><button class="btn" id="pEx" title="Load a sample for the current plane type">Example</button></div>
+<div class="flex gap-2 mb-2"><button class="btn" id="pClrSup">Clear supports</button><button class="btn" id="pClrLoad">Clear loads</button></div>
+<div class="flex gap-2"><button class="btn" id="pSave">Save JSON</button><button class="btn" id="pLoad">Load JSON</button></div><input type="file" id="pFile" accept=".json,application/json" class="hidden">
+</div></section>`);
+$('panels').insertBefore(pedSec,cardEls[2].sec.nextSibling);
+const peq=s=>pedSec.querySelector(s);
+const pPills={};
+PTOOLS.forEach(([k,l])=>{ const s=document.createElement('span'); s.className='pill'; s.textContent=l; s.onclick=()=>setPTool(k); peq('#pTools').appendChild(s); pPills[k]=s; });
+function pSetSupOpts(){
+  const o=P.pType==='wall'
+    ?[['fixed','Fixed (ux, uz)'],['rollerZ','Roller: vertical only (uz)'],['rollerX','Roller: horizontal only (ux)'],['none','Remove support']]
+    :[['ss','Simply supported (w = 0)'],['clamped','Clamped (w, θx, θy = 0)'],['none','Remove support']];
+  peq('#pSup').innerHTML=o.map(x=>`<option value="${x[0]}">${x[1]}</option>`).join('');
+}
+function pSnap(){ PM.hist.push(JSON.stringify({c:PM.cells,s:PM.sup,l:PM.load,n:PM.lines})); if(PM.hist.length>60) PM.hist.shift(); }
+function pUndo(){ const s=PM.hist.pop(); if(!s) return; const o=JSON.parse(s); PM.cells=o.c; PM.sup=o.s; PM.load=o.l; PM.lines=o.n; PM.pend=null; pChanged(); }
+function pChanged(){ refreshP(); requestUpdate(); }
+function setPTool(t){
+  PM.tool=t; PM.pend=null;
+  Object.keys(pPills).forEach(k=>pPills[k].classList.toggle('on',k===t));
+  peq('#pHint').textContent=PHINTS[t]; refreshP(); requestUpdate();
+}
+function refreshP(){
+  peq('#pOptSup').style.display=PM.tool==='support'?'':'none';
+  peq('#pOptLoad').style.display=(PM.tool==='pload'||PM.tool==='lload')?'':'none';
+  peq('#pInfo').textContent=`${Object.keys(PM.cells).length} cells · ${Object.keys(PM.sup).length} support nodes · ${Object.keys(PM.load).length} point loads · ${PM.lines.length} line loads`;
+}
+
+/* ----- picking ----- */
+const pVert=q=>[Math.round(q[0]/P.pCell),Math.round(q[1]/P.pCell)];
+function pPlanePt(ev){
+  const rc=renderer.domElement.getBoundingClientRect();
+  mouse.set(((ev.clientX-rc.left)/rc.width)*2-1,-((ev.clientY-rc.top)/rc.height)*2+1);
+  ray.setFromCamera(mouse,camera);
+  const wall=P.pType==='wall';
+  wpPlane.set(new THREE.Vector3(0,wall?1:0,wall?0:1),0);
+  if(!ray.ray.intersectPlane(wpPlane,_hit)) return null;
+  const u=_hit.x, v=wall?_hit.z:_hit.y;
+  return Math.hypot(u,v)>1e4?null:[u,v];
+}
+function pClick(ev){
+  const q=pPlanePt(ev); if(!q) return;
+  const h=P.pCell, t=PM.tool, v=pVert(q);
+  if(t==='rect'||t==='cut'){
+    if(!PM.pend){ PM.pend=v; }
+    else {
+      const a=PM.pend; PM.pend=null;
+      const i0=Math.min(a[0],v[0]), i1=Math.max(a[0],v[0]), j0=Math.min(a[1],v[1]), j1=Math.max(a[1],v[1]);
+      if(i0!==i1&&j0!==j1){
+        if((i1-i0)*(j1-j0)>6000) alert('Region too large (max 6000 cells per block). Increase the grid size.');
+        else { pSnap(); for(let i=i0;i<i1;i++) for(let j=j0;j<j1;j++){ const k=i+','+j; if(t==='rect') PM.cells[k]=1; else delete PM.cells[k]; } }
+      }
+    }
+  } else if(t==='cell'){
+    pSnap(); const k=Math.floor(q[0]/h)+','+Math.floor(q[1]/h);
+    if(PM.cells[k]) delete PM.cells[k]; else PM.cells[k]=1;
+  } else if(t==='support'||t==='lload'){
+    if(!PM.pend){ PM.pend=v; }
+    else {
+      const a=PM.pend; PM.pend=null;
+      if(t==='support'){
+        pSnap(); const ty=peq('#pSup').value;
+        segNodes(a,v).forEach(n=>{ const k=n[0]+','+n[1]; if(ty==='none') delete PM.sup[k]; else PM.sup[k]=ty; });
+      } else {
+        const qv=[parseFloat(peq('#pFx').value)||0,parseFloat(peq('#pFz').value)||0];
+        if((a[0]!==v[0]||a[1]!==v[1])&&!(qv[0]===0&&qv[1]===0)){ pSnap(); PM.lines.push({a,b:v,q:qv}); }
+      }
+    }
+  } else if(t==='pload'){
+    pSnap(); const k=v[0]+','+v[1], fv=[parseFloat(peq('#pFx').value)||0,parseFloat(peq('#pFz').value)||0];
+    if(fv[0]===0&&fv[1]===0) delete PM.load[k]; else PM.load[k]=fv;
+  }
+  pChanged();
+}
+
+/* ----- overlay ----- */
+const pedGroup=new THREE.Group(); scene.add(pedGroup);
+const pLineMat=new THREE.LineBasicMaterial({color:0xfacc15});
+const mCellHov=new THREE.MeshBasicMaterial({color:0xfacc15,transparent:true,opacity:0.35,side:THREE.DoubleSide,depthWrite:false});
+const mAddFill=new THREE.MeshBasicMaterial({color:0x34d399,transparent:true,opacity:0.28,side:THREE.DoubleSide,depthWrite:false});
+const mCutFill=new THREE.MeshBasicMaterial({color:0xf43f5e,transparent:true,opacity:0.28,side:THREE.DoubleSide,depthWrite:false});
+let pGrid=null, pGridKey='', pCur=null;
+function updatePOverlay(){
+  pedGroup.children.forEach(c=>{ if(c.userData.own) c.geometry.dispose(); }); pedGroup.clear();
+  if(!pEditing()){ if(pGrid) pGrid.visible=false; return; }
+  const wall=P.pType==='wall', h=P.pCell, K=Math.round(30/h), N=2*K, key=P.pType+'|'+h;
+  if(!pGrid||key!==pGridKey){
+    if(pGrid){ scene.remove(pGrid); pGrid.geometry.dispose(); pGrid.material.dispose(); }
+    pGrid=new THREE.GridHelper(N*h,N,0x2f7a4d,0x1a3326); pGrid.material.transparent=true; pGrid.material.opacity=0.55;
+    const c=Math.round(K/2)*h;
+    if(wall) pGrid.position.set(c,0,c); else { pGrid.rotation.x=Math.PI/2; pGrid.position.set(c,c,0); }
+    scene.add(pGrid); pGridKey=key;
+  }
+  pGrid.visible=true;
+  const eps=Math.max(0.005,h*0.02), r=Math.max(0.04,h*0.15,(lastModel?lastModel.size:10)*0.008);
+  const P3=(u,v)=>wall?[u,-eps,v]:[u,v,eps];
+  const dot=(u,v,s,m)=>{ const o=new THREE.Mesh(sphGeo,m), p=P3(u,v); o.position.set(p[0],p[1],p[2]); o.scale.setScalar(s); pedGroup.add(o); };
+  const quad=(u0,v0,u1,v1,mat)=>{
+    const a=P3(u0,v0), b=P3(u1,v0), c=P3(u1,v1), d=P3(u0,v1);
+    const g=new THREE.BufferGeometry(); g.setAttribute('position',new THREE.Float32BufferAttribute([...a,...b,...c,...a,...c,...d],3));
+    const m=new THREE.Mesh(g,mat); m.userData.own=true; pedGroup.add(m);
+    const lg=new THREE.BufferGeometry(); lg.setAttribute('position',new THREE.Float32BufferAttribute([...a,...b,...c,...d],3));
+    const l=new THREE.LineLoop(lg,pLineMat); l.userData.own=true; pedGroup.add(l);
+  };
+  const t=PM.tool;
+  if(pCur){
+    const v=pVert(pCur), vu=v[0]*h, vv=v[1]*h;
+    if(t==='cell'){ const ci=Math.floor(pCur[0]/h), cj=Math.floor(pCur[1]/h); quad(ci*h,cj*h,(ci+1)*h,(cj+1)*h,mCellHov); }
+    else dot(vu,vv,r*0.8,mCur);
+    if(PM.pend&&(t==='rect'||t==='cut')) quad(PM.pend[0]*h,PM.pend[1]*h,vu,vv,t==='rect'?mAddFill:mCutFill);
+    else if(PM.pend&&(t==='support'||t==='lload')){
+      const a=P3(PM.pend[0]*h,PM.pend[1]*h), b=P3(vu,vv), g=new THREE.BufferGeometry();
+      g.setAttribute('position',new THREE.Float32BufferAttribute([...a,...b],3));
+      const l=new THREE.Line(g,pLineMat); l.userData.own=true; pedGroup.add(l);
+    }
+  }
+  if(PM.pend) dot(PM.pend[0]*h,PM.pend[1]*h,r*1.6,mPend);
+}
+let pDown=null;
+renderer.domElement.addEventListener('pointerdown',ev=>{ pDown=[ev.clientX,ev.clientY,ev.button]; });
+renderer.domElement.addEventListener('pointerup',ev=>{
+  if(!pDown) return; const mv=Math.hypot(ev.clientX-pDown[0],ev.clientY-pDown[1]), b=pDown[2]; pDown=null;
+  if(mv<5&&b===0&&pEditing()) pClick(ev);
+});
+renderer.domElement.addEventListener('pointermove',ev=>{
+  if(!pEditing()||ev.buttons) return;
+  pCur=pPlanePt(ev); updatePOverlay();
+});
+window.addEventListener('keydown',ev=>{
+  if(P.struct!=='cplane') return;
+  const tg=ev.target&&ev.target.tagName; if(tg==='INPUT'||tg==='SELECT'||tg==='TEXTAREA') return;
+  if(ev.key==='Escape'){ PM.pend=null; updatePOverlay(); }
+  else if((ev.ctrlKey||ev.metaKey)&&ev.key.toLowerCase()==='z'){ ev.preventDefault(); pUndo(); }
+});
+
+/* ----- buttons, example, files ----- */
+peq('#pUndo').onclick=pUndo;
+peq('#pClear').onclick=()=>{ if(!Object.keys(PM.cells).length&&!Object.keys(PM.sup).length&&!Object.keys(PM.load).length&&!PM.lines.length) return; pSnap(); PM.cells={}; PM.sup={}; PM.load={}; PM.lines=[]; PM.pend=null; pChanged(); };
+peq('#pClrSup').onclick=()=>{ pSnap(); PM.sup={}; pChanged(); };
+peq('#pClrLoad').onclick=()=>{ pSnap(); PM.load={}; PM.lines=[]; pChanged(); };
+peq('#pEx').onclick=()=>{
+  pSnap(); const wall=P.pType==='wall', cells={}, sup={};
+  const fillR=(i0,i1,j0,j1,on)=>{ for(let i=i0;i<i1;i++) for(let j=j0;j<j1;j++){ if(on) cells[i+','+j]=1; else delete cells[i+','+j]; } };
+  const line=(a,b,ty)=>segNodes(a,b).forEach(n=>sup[n[0]+','+n[1]]=ty);
+  PM.load={}; PM.lines=[];
+  if(wall){
+    ctl.pCell.set(0.5); ctl.pT.set(25);
+    fillR(0,24,0,10,true); fillR(8,16,3,6,false);
+    line([0,0],[3,0],'rollerZ'); line([21,0],[24,0],'rollerZ'); sup['0,0']='fixed';
+    PM.lines.push({a:[0,10],b:[24,10],q:[0,-120]});
+  } else {
+    ctl.pCell.set(0.5); ctl.pT.set(20);
+    fillR(0,12,0,12,true);
+    line([0,0],[12,0],'ss'); line([12,0],[12,12],'ss'); line([12,12],[0,12],'ss'); line([0,12],[0,0],'ss');
+  }
+  PM.cells=cells; PM.sup=sup; PM.pend=null; needFit=true; PM.lastType=P.pType;
+  setPTool('view'); pChanged();
+};
+peq('#pSave').onclick=()=>{
+  const o={app:'ParaFEA',kind:'cplane',version:1,pType:P.pType,pCell:P.pCell,pT:P.pT,E:P.E,fy:P.fy,rho:P.rho,nu:P.nu,qload:P.qload,
+    cells:Object.keys(PM.cells).map(k=>k.split(',').map(Number)),supports:PM.sup,loads:PM.load,lines:PM.lines};
+  download('parafea_plane.json',JSON.stringify(o,null,1),'application/json');
+};
+peq('#pLoad').onclick=()=>peq('#pFile').click();
+peq('#pFile').onchange=ev=>{
+  const f=ev.target.files[0]; if(!f) return; const rd=new FileReader();
+  rd.onload=()=>{
+    try{
+      const o=JSON.parse(rd.result), isI=Number.isInteger, isK=k=>/^-?\d+,-?\d+$/.test(k), isIJ=a=>Array.isArray(a)&&a.length===2&&isI(a[0])&&isI(a[1])&&Math.abs(a[0])<10000&&Math.abs(a[1])<10000;
+      if(o.kind!=='cplane') throw new Error('not a ParaFEA plane model');
+      const pt=o.pType==='slab'?'slab':'wall', okS=pt==='wall'?['fixed','rollerZ','rollerX']:['ss','clamped'];
+      if(!Array.isArray(o.cells)||o.cells.length>8000||!o.cells.every(isIJ)) throw new Error('invalid cells');
+      const cells={}, sup={}, load={}, lines=[];
+      o.cells.forEach(c=>cells[c[0]+','+c[1]]=1);
+      for(const k in (o.supports||{})) if(isK(k)&&okS.includes(o.supports[k])) sup[k]=o.supports[k];
+      for(const k in (o.loads||{})){ const v=o.loads[k]; if(isK(k)&&Array.isArray(v)&&v.length===2&&v.every(Number.isFinite)) load[k]=v; }
+      (o.lines||[]).forEach(L=>{ if(L&&isIJ(L.a)&&isIJ(L.b)&&Array.isArray(L.q)&&L.q.length===2&&L.q.every(Number.isFinite)) lines.push({a:L.a,b:L.b,q:L.q}); });
+      pSnap();
+      ctl.pType.set(pt); PM.lastType=pt;
+      if(Number.isFinite(o.pCell)&&o.pCell>=0.1&&o.pCell<=2) ctl.pCell.set(o.pCell);
+      if(Number.isFinite(o.pT)) ctl.pT.set(o.pT);
+      ['E','fy','rho','nu','qload'].forEach(k=>{ if(Number.isFinite(o[k])) ctl[k].set(o[k]); });
+      ctl.mat.set('custom');
+      PM.cells=cells; PM.sup=sup; PM.load=load; PM.lines=lines; PM.pend=null; needFit=true;
+      onChange('pType');
+    } catch(e){ alert('Could not load plane model: '+e.message); }
+  };
+  rd.readAsText(f); ev.target.value='';
+};
+pSetSupOpts();
+Object.keys(pPills).forEach(k=>pPills[k].classList.toggle('on',k===PM.tool));
+peq('#pHint').textContent=PHINTS[PM.tool]; refreshP();
+
+/* =========================================================
    RESULTS DASHBOARD
    ========================================================= */
-for(let i=1;i<=4;i++) $('cards').appendChild(mk(`<div class="rounded-lg bg-white/[0.04] p-2"><div class="text-[10px] text-slate-400" id="cLab${i}">—</div><div class="text-lg font-semibold text-orange-300 tabular-nums"><span id="cVal${i}">0</span><span class="text-[11px] text-slate-400" id="cUnit${i}"></span></div><div id="cSub${i}" class="text-[10px] text-slate-500">—</div></div>`));
+for(let i=1;i<=4;i++) $('cards').appendChild(mk(`<div class="rounded-lg bg-white/[0.04] p-2"><div class="text-[10px] text-slate-400" id="cLab${i}">—</div><div class="text-lg font-semibold text-green-300 tabular-nums"><span id="cVal${i}">0</span><span class="text-[11px] text-slate-400" id="cUnit${i}"></span></div><div id="cSub${i}" class="text-[10px] text-slate-500">—</div></div>`));
 const axName=['x','y','z'];
 function vecStr(v){ const p=[]; v.forEach((x,i)=>{ if(Math.abs(x)>1e-6) p.push(`F${axName[i]} ${x.toFixed(1)}`); }); return p.length?p.join(' · ')+' kN':'0 kN'; }
 function updateDashboard(model,res){
@@ -1143,6 +1826,7 @@ function updateDashboard(model,res){
   const bar=$('rUtilBar'); bar.style.width=Math.min(100,pct)+'%';
   const st=$('rStatus'); let cls,txt,colr;
   if(res.tooLarge){txt='TOO LARGE';cls='bg-amber-500/20 text-amber-300';colr='#fbbf24';}
+  else if(model.empty){txt='EMPTY';cls='bg-slate-500/20 text-slate-300';colr='#94a3b8';}
   else if(res.unstable){txt='UNSTABLE';cls='bg-rose-500/20 text-rose-300';colr='#f43f5e';}
   else if(u<0.8){txt='SAFE';cls='bg-emerald-500/20 text-emerald-300';colr='#34d399';}
   else if(u<=1){txt='NEAR LIMIT';cls='bg-amber-500/20 text-amber-300';colr='#fbbf24';}
@@ -1162,6 +1846,7 @@ function updateDashboard(model,res){
 let pending=false;
 function requestUpdate(){ if(pending) return; pending=true; requestAnimationFrame(()=>{pending=false; update();}); }
 function update(){
+  P.cm=CM; P.pm=PM;
   const model=buildModel(P), res=solveAndPost(model,P);
   lastModel=model; lastRes=res;
   renderScene(model,res); updateDashboard(model,res);
@@ -1183,6 +1868,10 @@ $('bCsv').onclick=()=>{
     s+='\n# ELEMENTS (quad connectivity)\nid,n1,n2,n3,n4\n';
     m.els.forEach((el,e)=>s+=`${e},${el.nodes.join(',')}\n`);
   }
+  if(r.bmd){
+    s+='\n# BENDING MOMENT DIAGRAM (kN*m; sagging positive, tension-side convention)\nelement,station,x_m,My_kNm,Mz_kNm\n';
+    r.bmd.forEach((q,e)=>{ const L=m.els[e].L, n=q.my.length-1; for(let k=0;k<=n;k++) s+=`${e},${k},${(L*k/n).toFixed(4)},${(-BMD_SIGN.my*q.my[k]).toFixed(3)},${(-BMD_SIGN.mz*q.mz[k]).toFixed(3)}\n`; });
+  }
   download('parafea_results.csv',s,'text/csv');
 };
 $('bPy').onclick=()=>{
@@ -1201,6 +1890,14 @@ $('bPy').onclick=()=>{
     s+=`]\nvmax = ${mxv.toFixed(4)}\n\ncolors = []\nfor v in vm:\n    t = max(0.0, min(1.0, v / vmax))\n    colors.append(System.Drawing.Color.FromArgb(int(255*t), int(255*(1-abs(2*t-1))), int(255*(1-t))))\nmesh = rs.AddMesh(nodes, faces, vertex_colors=colors)\n`;
   }
   download('parafea_model.py',s,'text/x-python');
+};
+$('bPng').onclick=()=>{
+  renderer.render(scene,camera);
+  const src=renderer.domElement, c=document.createElement('canvas'); c.width=src.width; c.height=src.height;
+  const g=c.getContext('2d'); g.fillStyle='#000000'; g.fillRect(0,0,c.width,c.height); g.drawImage(src,0,0);
+  const sx=c.width/host.clientWidth; g.font=Math.round(11*sx)+'px sans-serif'; g.fillStyle='#6ff0a0'; g.textAlign='center'; g.textBaseline='middle';
+  bmdLabels.forEach(l=>{ const v=l.pos.clone().project(camera); if(v.z>1||v.z<-1) return; g.fillText(l.text,(v.x*0.5+0.5)*c.width,(-v.y*0.5+0.5)*c.height); });
+  c.toBlob(b=>{ const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download='parafea_view.png'; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),1000); });
 };
 $('bFit').onclick=fitView;
 $('bReset').onclick=()=>{ P={...DEFAULTS,struct:P.struct,...PRESETS[P.struct]}; syncUI(); needFit=true; requestUpdate(); };
